@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Socket.io</title>
+
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
+    <script>
+
+        var socket = io.connect('http://localhost:8080');
+        socket.on('connect', function () {
+            socket.emit('getState', null, function (serverState) {
+
+                if(serverState.isCrashed) {
+                    $("#serverState").text("crashed");
+                    $("#exec").attr("disabled", false);
+                } else {
+                    $("#serverState").text("active");
+                    $("#exec").attr("disabled", true);
+                }
+
+
+            });
+        });
+
+        socket.on('isCrashed', function () {
+            $("#serverState").text("crashed");
+            $("#exec").attr("disabled", false);
+        });
+
+        socket.on('isStarted', function () {
+            $("#serverState").text("active");
+            $("#exec").attr("disabled", true);
+        });
+
+        $(document).ready(function() {
+
+            $('#exec').click(function() {
+                $("#serverState").text("starting ...");
+                socket.emit('restart', true);
+            });
+
+        });
+
+    </script>
+
+</head>
+
+<body>
+<span>Link.IO state : </span><span id="serverState">...</span><br>
+<input id="exec" type="button" value="Restart" disabled></input>
+</body>
+</html>
