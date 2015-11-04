@@ -1,10 +1,10 @@
-var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 var http = require('http');
 var fs = require('fs');
 
 // Configuration
-var port = 8080;
-var command = 'node crashtest.js';
+var port = 8081;
+var file = 'server.js';
 
 var isCrashed = false;
 
@@ -17,8 +17,8 @@ var server = http.createServer(function(req, res) {
 
 });
 
-server.listen(8080);
-console.log('Server started on *:' + port);
+server.listen(port);
+console.log('Link.io.server.monitoring started on *:' + port);
 
 // State signal
 var io = require('socket.io').listen(server);
@@ -32,32 +32,48 @@ io.on('connection', function (socket) {
 
     persistentSocket.on('restart', function (socket) {
         if(isCrashed)
-            execCommand(command);
+            execScript(file);
     });
 
 });
 
 // Exec the command and handle std
-function execCommand(command) {
+function execScript(file) {
 
     if(persistentSocket != undefined)
         persistentSocket.emit('isStarted');
 
-    exec(command, function(error, stdout, stderr) {
+    console.log('Command executed : "node ' + file + '".');
 
-        console.log('Command executed : "' + command + '".');
+    // Run node with the child.js file as an argument
+    var child = spawn('node', [file]);
 
-        if (stderr != '') {
-            isCrashed = true;
-            if(persistentSocket != undefined)
-                persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
-            console.log('The server crashed.');
-        }
+    // Print the first stdout
+    var printed = false;
+    child.stdout.on('data', function (data) {
+        if(!printed)
+            console.log('' + data);
+        printed = true;
+    });
 
-        if (error !== null)
-            console.log('Execution error : ' + error);
+    // Listen for any errors:
+    child.stderr.on('data', function (data) {
+        console.log('There was an error: ' + data);
+        child.kill('SIGINT');
+        isCrashed = true;
+        if(persistentSocket != undefined)
+            persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
+    });
+
+    // Listen for any errors:
+    child.stderr.on('data', function (data) {
+        console.log('There was an error: ' + data);
+        child.kill('SIGINT');
+        isCrashed = true;
+        if(persistentSocket != undefined)
+            persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
     });
 
 }
 
-execCommand(command);
+execScript(file);
