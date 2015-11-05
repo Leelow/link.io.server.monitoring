@@ -1,19 +1,36 @@
 var spawn = require('child_process').spawn;
 var http = require('http');
+var request = require("request");
 var fs = require('fs');
 
 // Configuration
 var port = 8081;
-var file = 'server.js';
+var file = 'F:\\dev-github\\link.io.server\\server.js';
+var logsUrl = 'http://localhost:8080';
+//var file = 'crashtest.js';
 
 var isCrashed = false;
 
-var server = http.createServer(function(req, res) {
+function readFile(path, contentType, res) {
 
-    fs.readFile('./client/manage.html', 'utf-8', function(error, content) {
-        res.writeHead(200, {"Content-Type": "text/html"});
+    fs.readFile(path, 'utf-8', function(error, content) {
+        res.writeHead(200, {"Content-Type": contentType});
         res.end(content);
     });
+
+}
+
+var server = http.createServer(function(req, res) {
+
+    var url = req.url;
+
+    if(url == '/styles/style.css')
+        readFile('./client/styles/style.css', 'text/css', res);
+
+    if(url == '/scripts/script.js')
+        readFile('./client/scripts/script.js', 'application/javascript', res);
+
+    readFile('./client/manage.html', 'text/html', res);
 
 });
 
@@ -26,16 +43,33 @@ var persistentSocket;
 io.on('connection', function (socket) {
     persistentSocket = socket;
 
-    socket.on('getState', function (name, fn) {
-        fn({'isCrashed':isCrashed});
+    // Get olds logs
+    request(logsUrl, function(err, res, body) {
+        if (err) {
+            throw err;
+        }
+
+        // Send old logs
+        socket.emit('oldLogs', {'oldLogs' : body});
+
+        socket.on('getState', function (name, fn) {
+            fn({'isCrashed':isCrashed});
+        });
+
+        socket.on('start', function (socket) {
+            if(isCrashed)
+                execScript(file);
+        });
+
     });
 
-    persistentSocket.on('restart', function (socket) {
-        if(isCrashed)
-            execScript(file);
-    });
+
 
 });
+
+function getUnixTimestamp() {
+    return Math.floor(Date.now() / 1000);
+}
 
 // Exec the command and handle std
 function execScript(file) {
@@ -48,30 +82,35 @@ function execScript(file) {
     // Run node with the child.js file as an argument
     var child = spawn('node', [file]);
 
-    // Print the first stdout
-    var printed = false;
+
     child.stdout.on('data', function (data) {
-        if(!printed)
-            console.log('' + data);
-        printed = true;
+
+        if(persistentSocket != undefined) {
+
+            persistentSocket.emit('message', {'ts'   : getUnixTimestamp(),
+                                              'type' : 'debug',
+                                              'text' : data+''});
+
+        }
+
     });
+
 
     // Listen for any errors:
     child.stderr.on('data', function (data) {
-        console.log('There was an error: ' + data);
-        child.kill('SIGINT');
-        isCrashed = true;
-        if(persistentSocket != undefined)
-            persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
-    });
 
-    // Listen for any errors:
-    child.stderr.on('data', function (data) {
         console.log('There was an error: ' + data);
         child.kill('SIGINT');
         isCrashed = true;
-        if(persistentSocket != undefined)
+
+        if(persistentSocket != undefined) {
             persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
+            persistentSocket.emit('message', {'ts'   : getUnixTimestamp(),
+                'type' : 'error',
+                'text' : data+''});
+        }
+
+
     });
 
 }

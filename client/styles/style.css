@@ -1,0 +1,102 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+body, #entry {
+    background: #22252a;
+    color: #eee;
+}
+body, table {
+    font-family: 'Roboto', sans-serif;
+    font-size: 13pt;
+    line-height: 100%;
+}
+tr,td,table {
+    padding: 0;
+    margin: 0;
+    outline-width: 0;
+    border-width: 0;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0
+}
+
+a { text-decoration: none; color: #fff; }
+a:hover { text-decoration: underline; color: #aaa; }
+
+#title {
+	
+	float:right;
+	padding-right:0.5em;
+	
+}
+
+#toolbar {
+    position: fixed;
+    color: #fff;
+    width: 100%;
+    top: 0;
+    background: #fc9700;
+}
+
+#entry {
+    width: 100%;
+    font-size: inherit;
+    padding: 1em;
+    margin: 0;
+    border-width: 0;
+    outline-width: 0;
+    clear: both;
+}
+
+#log {
+    display: block;
+    padding-top: 1em;
+    padding-left: 0.3em;
+    font-size: 11pt;
+    background: inherit;
+    overflow: hidden;
+}
+
+.cmd.debug {
+    color: #ffffff;
+}
+
+.cmd.warning {
+    color: #f7a63d;
+}
+
+.cmd.error {
+     color: #ff0000;
+ }
+
+.cmd.old {
+    color: #c0c1be;
+}
+
+.message {
+    margin: 0.1em 0;
+}
+
+.message td {
+    vertical-align: top;
+}
+
+
+#toolbar ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#toolbar li {
+    display: block;
+    float: left;
+    margin: 0 2em 0 0;
+}
+
+#usersLink {
+    color: inherit;
+}
