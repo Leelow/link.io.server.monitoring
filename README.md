@@ -23,7 +23,7 @@ Then you have to edit *settings.json* to configure server and client side at the
 
 # Web interface
 
-More infos coming soon ...
+More information coming soon ...
 
 # Link.io.server
 
