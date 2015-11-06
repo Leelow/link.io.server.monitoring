@@ -1,44 +1,39 @@
 var spawn = require('child_process').spawn;
 var http = require('http');
-var request = require("request");
-var fs = require('fs');
+var serveStatic = require('serve-static');
+var finalHandler = require('finalHandler');
+var request = require('request');
+
+// Necessary to get the configs
+var configurator = require('./lib/configurator.js')();
+var version = configurator.getLinkIOMonitoringServerVersion();
+
+// Generate public infos file
+configurator.generatePublicInfosFile();
 
 // Configuration
-var port = 8081;
-var file = 'F:\\dev-github\\link.io.server\\server.js';
-var logsUrl = 'http://localhost:8080';
-//var file = 'crashtest.js';
+var port = configurator.getLinkIOMonitoringServerPort();
+var script_path = configurator.getLinkIOServerScript();
+var logsUrl = configurator.getLinkIOServerUrl();
 
 var isCrashed = false;
 
-function readFile(path, contentType, res) {
-
-    fs.readFile(path, 'utf-8', function(error, content) {
-        res.writeHead(200, {"Content-Type": contentType});
-        res.end(content);
-    });
-
-}
-
+// State signal
 var server = http.createServer(function(req, res) {
-
-    var url = req.url;
-
-    if(url == '/styles/style.css')
-        readFile('./client/styles/style.css', 'text/css', res);
-
-    if(url == '/scripts/script.js')
-        readFile('./client/scripts/script.js', 'application/javascript', res);
-
-    readFile('./client/manage.html', 'text/html', res);
-
+    var done = finalHandler(req, res);
+    serve(req, res, done);
 });
 
-server.listen(port);
-console.log('Link.io.server.monitoring started on *:' + port);
+// Serve static files
+var serve = serveStatic("./client/");
 
-// State signal
-var io = require('socket.io').listen(server);
+// Initialize socket.io
+var io = require('socket.io')(server);
+
+// Start server in the good port
+server.listen(port);
+console.log('Link.io.server.monitoring (v' + version + ') started on *:' + port);
+
 var persistentSocket;
 io.on('connection', function (socket) {
     persistentSocket = socket;
@@ -90,7 +85,6 @@ function execScript(file) {
             persistentSocket.emit('message', {'ts'   : getUnixTimestamp(),
                                               'type' : 'debug',
                                               'text' : data+''});
-
         }
 
     });
@@ -115,4 +109,4 @@ function execScript(file) {
 
 }
 
-execScript(file);
+execScript(script_path);

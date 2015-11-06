@@ -1,0 +1,15 @@
+{
+
+  "link_io_server_monitoring" : {
+
+      "port"   : 8081,
+      "url"    : "http://192.168.1.11:8081"
+
+  },
+  "logs_link_io_server" : {
+
+      "script" : "F:\\dev-github\\link.io.server\\server.js",
+      "url"    : "http://192.168.1.11:8080"
+
+  }
+}
