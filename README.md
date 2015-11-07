@@ -28,3 +28,7 @@ More information coming soon ...
 # Link.io.server
 
 You can find more information about the the Link.IO API server [here](https://github.com/Chaniro/link.io.server/).
+
+# TO-DO
+
+Rethink socket management and add a login.
