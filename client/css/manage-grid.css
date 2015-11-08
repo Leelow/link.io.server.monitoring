@@ -83,3 +83,6 @@ html, body {
     background-color: white;
 }
 
+#eventsChart .wrapper {
+    margin: 0 5px;
+}

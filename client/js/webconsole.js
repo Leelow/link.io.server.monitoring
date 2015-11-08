@@ -51,7 +51,7 @@ function webConsole(socket, showLoading) {
 		$('#log-event').html('');
 	});
 
-	$("#eventsCanvas").attr("width", $("#eventsChart").width());
+	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
 
 	var ctx = document.getElementById("eventsCanvas").getContext("2d");
 	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {animationSteps: 15});
