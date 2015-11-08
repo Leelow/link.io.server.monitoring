@@ -68,8 +68,18 @@ html, body {
 
 #log-event {
     width: 35%;
+    height: calc(100% - 250px);
     background-color: #22252a;
 	padding-left: 25px;
 }
 
+#eventsChart {
+    width: 35%;
+    height: 250px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    background-color: white;
+}
 

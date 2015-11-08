@@ -1,3 +1,19 @@
+var eventsPerSecondConfig = {
+	datas: {
+		labels: [],
+		datasets: [
+			{
+				fillColor: "rgba(220,220,220,0.2)",
+				strokeColor: "rgba(220,220,220,1)",
+				pointColor: "rgba(220,220,220,1)",
+				pointStrokeColor: "#fff",
+				data: []
+		}]
+	},
+	maxValues: 60, //1 minute
+	chart: undefined
+}
+
 function webConsole(socket, showLoading) {
 	
 	// If we want to show loading form
@@ -32,7 +48,11 @@ function webConsole(socket, showLoading) {
 		$('#log-output').html('');
 		$('#log-event').html('');
 	});
-	
+
+	$("#eventsCanvas").attr("width", $("#eventsChart").width());
+
+	var ctx = document.getElementById("eventsCanvas").getContext("2d");
+	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {animationSteps: 15});
 }
 
 
@@ -71,11 +91,14 @@ function whileLoading(socket) {
 		var arr = msg.text.split(' ');
 		var res = arr.slice(0, 2);
 		var type = res[0];
-		
+		var level = res[1];
+
 		if(type == 'INFO')
 			addLog(msg.type, msg.text, true);
 		else if(type == 'EVENT')
 			addEvent(arr.slice(1)[0]);
+		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
+			addEventsPerSecond(arr[2]);
 		else
 			addLog(msg.type, msg.text, true);
 	});
@@ -183,7 +206,18 @@ function addEvent(event_str) {
 		}
 		isCollapsed = !isCollapsed;
 	});	
-	
+
+}
+
+function addEventsPerSecond(nb) {
+	var now = new Date();
+	eventsPerSecondConfig.chart.addData([nb], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
+
+	if(now.getSeconds()%5 != 0)
+		eventsPerSecondConfig.chart.scale.xLabels[eventsPerSecondConfig.chart.scale.xLabels.length - 1] = "";
+
+	if(eventsPerSecondConfig.chart.scale.xLabels.length > eventsPerSecondConfig.maxValues)
+		eventsPerSecondConfig.chart.removeData();
 }
 
 function updateServerState(active) {
