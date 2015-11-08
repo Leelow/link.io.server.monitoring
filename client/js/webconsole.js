@@ -72,7 +72,7 @@ function whileLoading(socket) {
 
 		var logs_array = oldLogs.split('\n');
 		for(var i = 0; i < logs_array.length; i++){
-			addLog(null, 'old', logs_array[i], false); //TODo timestamp
+			addLog('old', logs_array[i], false); //TODo timestamp
 		}
 	});
 
@@ -94,18 +94,18 @@ function whileLoading(socket) {
 		var level = res[1];
 
 		if(type == 'INFO')
-			addLog(msg.type, msg.text, true);
+			addLog(msg.type, msg.text);
 		else if(type == 'EVENT')
 			addEvent(arr.slice(1)[0]);
 		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
 			addEventsPerSecond(arr[2]);
 		else
-			addLog(msg.type, msg.text, true);
+			addLog(msg.type, msg.text);
 	});
 	
 }
 
-function convertToLog(type, str) {
+function convertToLog(str) {
 	return getDatePrefix(true, false) + ' ' + str;
 }
 
@@ -141,15 +141,16 @@ function getDatePrefix(full, ms) {
 	
 }
 
-function addLog(ts, type, str, printDate) {
+function addLog(type, str) {
+	if(type != 'old') {
+		var logOutput = $('#log-output');
+		var children = logOutput.children();
 
-	var logOutput = $('#log-output');
-	var children = logOutput.children();
-	
-	if(children.size() == 0)
-		logOutput.append("<div class='cmd " + type + "'>" + convertToLog(ts, type, str, printDate) + "</div>");
-	else
-		children.first().before("<div class='cmd " + type + "'>" + convertToLog(ts, type, str, printDate) + "</div>");
+		if (children.size() == 0)
+			logOutput.append("<div class='cmd " + type + "'>" + convertToLog(str) + "</div>");
+		else
+			children.first().before("<div class='cmd " + type + "'>" + convertToLog(str) + "</div>");
+	}
 	
 }
 
