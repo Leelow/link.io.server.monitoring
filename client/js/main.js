@@ -84,10 +84,10 @@ $(document).ready(function() {
 						login(function(login, password) {
 
 							// Save credentials in a cookie for a next time
-							Cookies.set('credentials', JSON.stringify({login, password}));
+							Cookies.set('credentials', JSON.stringify({'login': login, 'password':password}));
 							
 							// Check login and password
-							socket.emit('checkCredentials', {login, password});
+							socket.emit('checkCredentials', {'login': login, 'password':password});
 							
 						});
 						
@@ -101,10 +101,10 @@ $(document).ready(function() {
 			login(function(login, password) {
 
 				// Save credentials in a cookie for a next time
-				Cookies.set('credentials', JSON.stringify({login, password}));
+				Cookies.set('credentials', JSON.stringify({'login': login, 'password':password}));
 				
 				// Check login and password
-				socket.emit('checkCredentials', {login, password});
+				socket.emit('checkCredentials', {'login': login, 'password':password});
 				
 			});
 		
