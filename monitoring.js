@@ -14,7 +14,7 @@ configurator.generatePublicInfosFile();
 // Configuration
 var port = configurator.getLinkIOMonitoringServerPort();
 var script_path = configurator.getLinkIOServerScript();
-var logsUrl = configurator.getLinkIOServerUrl();
+var logsUrl = 'http://' + configurator.getLinkIOServerHost() + ':' + configurator.getLinkIOServerPort();
 
 // State signal
 var server = http.createServer(function(req, res) {

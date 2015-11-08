@@ -268,12 +268,13 @@ function minDigits(n, digits) {
 
 }
 
+
 function getMonitoringServerUrl(func) {
-	
-	$.getJSON('./infos.json', function(infos) {			
-		func(infos.link_io_server_monitoring.url);
+
+	$.getJSON('./infos.json', function(infos) {
+		func('http://' + infos.link_io_server_monitoring.host + ':' +infos.link_io_server_monitoring.port);
 	});
-	
+
 }
 
 function sizeof( object ) {

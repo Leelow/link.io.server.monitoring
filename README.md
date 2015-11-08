@@ -2,7 +2,7 @@
 
 #### Installation
 
-You have to install nodejs dependencies. To do this, open a console in the project directory and execute :
+You have to install nodejs dependencies. To do this, open a console in the project directory and execute
 
 > npm install
 
