@@ -1,59 +1,30 @@
-$( document ).ready(function() {
-
-	updateTitle();
-
-	getMonitoringServerUrl(function(url_monitoring_server) {
-
-		var socket = io.connect(url_monitoring_server);
-
-		// On connection
-		socket.on('connect', function () {
-			socket.emit('getState', null, function (serverState) {
-
-				updateServerState(!serverState.isCrashed);
-
-			});
-		});
-
-		// On olg logs receiving
-		socket.on('oldLogs', function (data) {
-			var logs_array = data.oldLogs.split('\n');
-			for(var i = 0; i < logs_array.length; i++){
-				addLog(null, 'old', logs_array[i], false); //TODo timestamp
-			}
-		});
-
-		// When the server crashed
-		socket.on('isCrashed', function () {
-			updateServerState(false);
-		});
-
-		// When the server is started
-		socket.on('isStarted', function () {
-			updateServerState(true);
-		});
-
-		// When the server emit an output
-		socket.on('message', function (msg) {
+function webConsole(socket, showLoading) {
+	
+	// If we want to show loading form
+	if(showLoading) {
+	
+		// When the web console is loading
+		loading(function() {
 			
-			// Test if it's an event or an output (the type)
-			var arr = msg.text.split(' ');
-			var res = arr.slice(0, 2);
-			var type = res[0];
-			
-			if(type == 'INFO')
-				addLog(msg.ts, msg.type, msg.text, true);
-			else if(type == 'EVENT')
-				addEvent(arr.slice(1)[0]);
-			else
-				addLog(msg.ts, msg.type, msg.text, true);
-		});
-
-	});
+			whileLoading(socket);
 		
+		});
+	
+	} else {
+		
+		whileLoading(socket);
+		
+	}
+	
+	// Logout button
+	$('.btn-logout').click(function() {
+		Cookies.remove('credentials');
+		window.location.href = '/';
+	});
+	
 	// Restart button
 	$('.btn-restart').click(function() {
-		socket.emit('start', true);
+		socket.emit('restart', true);
 	});
 
 	// Clear button
@@ -61,8 +32,55 @@ $( document ).ready(function() {
 		$('#log-output').html('');
 		$('#log-event').html('');
 	});
+	
+}
 
-});
+
+function whileLoading(socket) {
+	
+	// Hide the login form
+	hideLoginForm();
+	
+	// Prepare web console displaying
+	$('#webconsole').show();
+	
+	// Update the page title
+	updateTitle();
+
+	// On olg logs receiving
+	socket.on('getOldLogs', function (oldLogs) {
+
+		var logs_array = oldLogs.split('\n');
+		for(var i = 0; i < logs_array.length; i++){
+			addLog(null, 'old', logs_array[i], false); //TODo timestamp
+		}
+	});
+
+	// When the server state changed
+	socket.on('serverState', function (serverState) {
+		updateServerState(serverState);
+	});
+	
+	// Indicate to the server that user can load some things
+	socket.emit('retrieveData');
+	
+	// When the server emit an output
+	socket.on('message', function (msg) {
+		
+		// Test if it's an event or an output (the type)
+		var arr = msg.text.split(' ');
+		var res = arr.slice(0, 2);
+		var type = res[0];
+		
+		if(type == 'INFO')
+			addLog(msg.ts, msg.type, msg.text, true);
+		else if(type == 'EVENT')
+			addEvent(arr.slice(1)[0]);
+		else
+			addLog(msg.ts, msg.type, msg.text, true);
+	});
+	
+}
 
 function convertToLog(ts, type, str, printDate) {
 

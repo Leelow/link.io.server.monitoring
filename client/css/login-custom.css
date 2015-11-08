@@ -1,0 +1,38 @@
+#logo-linkio {
+	float: left;
+	height: 3em;
+	width: 3em;
+	padding-left:0.6em;
+}
+
+#title {
+	background-color: rgb(118, 171, 219);
+	background-position: initial initial;
+	background-repeat: initial initial;
+	padding:0.6em 0 0.6em 0;
+}
+
+#title-info {
+	display: inline-block;
+	line-height: 3em;
+	margin-left:-3em;
+	font-weight: bold;
+}
+
+#name {
+	background-color: rgb(255, 255, 255);
+	background-position: initial initial;
+	background-repeat: initial initial;
+}
+
+#pass {
+	background-color: rgb(255, 255, 255);
+	background-position: initial initial;
+	background-repeat: initial initial;
+}
+
+#signupb {
+	opacity: 0.2;
+	cursor: default;
+	outline: none;
+}

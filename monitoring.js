@@ -16,8 +16,6 @@ var port = configurator.getLinkIOMonitoringServerPort();
 var script_path = configurator.getLinkIOServerScript();
 var logsUrl = configurator.getLinkIOServerUrl();
 
-var isCrashed = false;
-
 // State signal
 var server = http.createServer(function(req, res) {
     var done = finalHandler(req, res);
@@ -34,43 +32,71 @@ var io = require('socket.io')(server);
 server.listen(port);
 console.log('Link.io.server.monitoring (v' + version + ') started on *:' + port);
 
-var persistentSocket;
+// Server state
+var serverState = false;
+
+// On user connection
 io.on('connection', function (socket) {
-    persistentSocket = socket;
 
-    // Get olds logs
-    request(logsUrl, function(err, res, body) {
-        if (err) {
-            throw err;
+    var firstAuth = true;
+    var isAuth = false;
+
+    // On user auth-ask
+    socket.on('checkCredentials', function(credentials) {
+
+        // Check credentials
+        isAuth = configurator.checkCredentials(credentials.login, credentials.password);
+        socket.emit('resCheckCredentials', isAuth);
+
+        // If the user is authentificated
+        if(isAuth && firstAuth) {
+            firstAuth = false;
+
+            console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
+
+            socket.join('auth-room');
+
+            socket.on('retrieveData', function() {
+
+                // Send old logs
+                sendOldLogs(socket);
+
+                // Emit server state
+                socket.emit('serverState', serverState);
+
+            });
+
+            // Allow the user to restart the server after a crash
+            socket.on('restart', function () {
+
+                if(!serverState)
+                    execScript(script_path);
+
+            })
+
         }
-
-        // Send old logs
-        socket.emit('oldLogs', {'oldLogs' : body});
-
-        socket.on('getState', function (name, fn) {
-            fn({'isCrashed':isCrashed});
-        });
-
-        socket.on('start', function (socket) {
-            if(isCrashed)
-                execScript(file);
-        });
 
     });
 
-
-
 });
 
-function getUnixTimestamp() {
-    return Math.floor(Date.now() / 1000);
+function sendOldLogs(socket) {
+
+    request(logsUrl, function(err, res, oldLogs) {
+
+        // Send old logs
+        socket.emit('getOldLogs', oldLogs);
+
+    });
+
 }
 
 // Exec the command and handle std
 function execScript(file) {
 
-    if(persistentSocket != undefined)
-        persistentSocket.emit('isStarted');
+    serverState = true;
+    io.to('auth-room').emit('serverState', serverState)
+    //emitToAuthSockets('serverState', serverState);
 
     console.log('Command executed : "node ' + file + '".');
 
@@ -79,14 +105,8 @@ function execScript(file) {
 
 
     child.stdout.on('data', function (data) {
-
-        if(persistentSocket != undefined) {
-
-            persistentSocket.emit('message', {'ts'   : getUnixTimestamp(),
-                                              'type' : 'debug',
-                                              'text' : data+''});
-        }
-
+        //emitToAuthSockets('message', {'type' : 'debug', 'text' : data+''});
+        io.to('auth-room').emit('message', {'type' : 'debug', 'text' : data+''});
     });
 
 
@@ -95,14 +115,12 @@ function execScript(file) {
 
         console.log('There was an error: ' + data);
         child.kill('SIGINT');
-        isCrashed = true;
 
-        if(persistentSocket != undefined) {
-            persistentSocket.emit('isCrashed', {'isCrashed':isCrashed});
-            persistentSocket.emit('message', {'ts'   : getUnixTimestamp(),
-                'type' : 'error',
-                'text' : data+''});
-        }
+        serverState = false;
+        //emitToAuthSockets('serverState', serverState);
+        io.to('auth-room').emit('serverState', serverState);
+        //emitToAuthSockets('message', {'type' : 'error', 'text' : data+''});
+        io.to('auth-room').emit('message', {'type' : 'error', 'text' : data+''});
 
 
     });

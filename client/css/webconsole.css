@@ -1,0 +1,17 @@
+#webconsole {
+	
+	display: none;
+	
+}
+
+.container {
+	
+	color: #FFFFFF;
+	
+}
+
+.cmd.error {
+	
+	color: #FF0000;
+	
+}
