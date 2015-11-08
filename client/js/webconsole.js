@@ -12,7 +12,9 @@ var eventsPerSecondConfig = {
 	},
 	maxValues: 60, //1 minute
 	chart: undefined
-}
+};
+var maxEventToKeep = 100;
+var currentEventID = 0;
 
 function webConsole(socket, showLoading) {
 	
@@ -139,7 +141,7 @@ function getDatePrefix(full, ms) {
 						
 	return date_str + ']';
 	
-}
+}{}
 
 function addLog(type, str) {
 	if(type != 'old') {
@@ -155,9 +157,14 @@ function addLog(type, str) {
 }
 
 function addEvent(event_str) {
-	
 	// Compute an unique id
-	var id = 'json-renderer-' + Math.round((Math.random() * 10000000), 10000000);
+	var id = 'json-renderer-' + (currentEventID++);
+
+	//Loop
+	currentEventID = currentEventID % maxEventToKeep;
+
+	//Remove existing event (loop)
+	$("#" + id).remove();
 
 	// Set the name
 	var prefix = getDatePrefix(false, true) + ' Event';
@@ -206,8 +213,7 @@ function addEvent(event_str) {
 			console.log(jsonRenderer.find('ul.json-dict').first().next());
 		}
 		isCollapsed = !isCollapsed;
-	});	
-
+	});
 }
 
 function addEventsPerSecond(nb) {
