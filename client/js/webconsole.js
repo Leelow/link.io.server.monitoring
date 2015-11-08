@@ -170,25 +170,22 @@ function addEvent(event_str) {
 
 	//Remove existing event (loop)
 	$("#" + id).remove();
-
-	// Set the name
-	var prefix = getDatePrefix(false, true) + ' Event';
 	
 	// Add a new json renderer
 	var logEvent = $('#log-event');
-	var children = logEvent.children();
-	
-	if(children.size() == 0)
-		logEvent.append('<pre id="' + id + '"></pre>');
-	else
-		children.first().before('<pre id="' + id + '"></pre>');
+
+	logEvent.prepend('<pre id="' + id + '"></pre>');
 
 	// Get the renderer
 	var jsonRenderer = $('#' + id);
 	
 	// Deserialize data
 	var event = JSON.parse(event_str);
-	currentSizeofEvents += sizeof(event);
+	var eventSize = event_str.length;
+	currentSizeofEvents += eventSize;
+
+	// Set the name
+	var prefix = getDatePrefix(false, true) + ' ' + event.type + ' (' + humanFileSize(eventSize, true) + ')';
 	
 	// Put data in the renderer
 	jsonRenderer.jsonViewer(event);
@@ -290,7 +287,7 @@ function sizeof( object ) {
 			bytes += 4;
 		}
 		else if ( typeof value === 'string' ) {
-			bytes += value.length * 2;
+			bytes += value.length;
 		}
 		else if ( typeof value === 'number' ) {
 			bytes += 8;
@@ -309,4 +306,20 @@ function sizeof( object ) {
 		}
 	}
 	return bytes;
+}
+
+function humanFileSize(bytes, si) {
+	var thresh = si ? 1000 : 1024;
+	if(Math.abs(bytes) < thresh) {
+		return bytes + ' o';
+	}
+	var units = si
+		? ['Ko','Mo','Go','To','Po','Eo','Zo','Yo']
+		: ['Kio','Mio','Gio','Tio','Pio','Eio','Zio','Yio'];
+	var u = -1;
+	do {
+		bytes /= thresh;
+		++u;
+	} while(Math.abs(bytes) >= thresh && u < units.length - 1);
+	return bytes.toFixed(1)+' '+units[u];
 }
