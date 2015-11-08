@@ -95,8 +95,7 @@ function sendOldLogs(socket) {
 function execScript(file) {
 
     serverState = true;
-    io.to('auth-room').emit('serverState', serverState)
-    //emitToAuthSockets('serverState', serverState);
+    io.to('auth-room').emit('serverState', serverState);
 
     console.log('Command executed : "node ' + file + '".');
 
@@ -105,7 +104,6 @@ function execScript(file) {
 
 
     child.stdout.on('data', function (data) {
-        //emitToAuthSockets('message', {'type' : 'debug', 'text' : data+''});
         io.to('auth-room').emit('message', {'type' : 'debug', 'text' : data+''});
     });
 
@@ -117,9 +115,7 @@ function execScript(file) {
         child.kill('SIGINT');
 
         serverState = false;
-        //emitToAuthSockets('serverState', serverState);
         io.to('auth-room').emit('serverState', serverState);
-        //emitToAuthSockets('message', {'type' : 'error', 'text' : data+''});
         io.to('auth-room').emit('message', {'type' : 'error', 'text' : data+''});
 
 

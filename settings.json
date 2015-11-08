@@ -1,16 +1,16 @@
 {
   "link_io_server_monitoring": {
-    "login": "camia",
+    "login": "1",
     "password": {
-      "value": "6hcAie1bQMCotf9250d5dfb15f6acbfba20bfe254b0f144c6a1ef",
+      "value": "jebqwa8V0FpCW13203062e1e6b91acf66b11ba5671974fe47c13a",
       "isHashed": true
     },
     "sessionLength": 15,
     "port": 8081,
-    "url": "http://192.168.1.11:8081"
+    "url": "http://192.168.0.106:8081"
   },
   "logs_link_io_server": {
     "script": "F:\\dev-github\\link.io.server\\server.js",
-    "url": "http://192.168.1.11:8080"
+    "url": "http://192.168.0.106:8080"
   }
 }
