@@ -18,7 +18,7 @@ html, body {
     background-color: #fc9700;
     position: relative;
     z-index: 10;
-    height: 30px;
+    height: 2em;
 }
 
 #toolbar input.btn-restart {

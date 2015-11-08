@@ -1,43 +1,56 @@
 #webconsole {
-	
 	display: none;
-	
 }
 
 .container {
-	
 	color: #FFFFFF;
-	
 }
 
 .cmd.error {
-	
 	color: #FF0000;
-	
 }
 
-#btn-restart {
+#webconsole .logo-linkio {
+	height:1.5em;
+	margin-right:0.5em;
+}
+
+.btn {
     -moz-appearance: none;
     -webkit-appearance: none;
-    padding: 0 8px;
-    margin: 35px auto;
-    background: #fff;
-    border: 1px solid #d9d9d9;
-    border-top: 1px solid silver;
+    border: 1px solid;
+    border-top: 1px solid;
     -moz-border-radius: 1px;
     -webkit-border-radius: 1px;
     border-radius: 1px;
-    color: #838383;
-    width: 409px;
     display: block;
-    margin-bottom: 10px;
     z-index: 1;
     position: relative;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box;
     direction: ltr;
-    height: 44px;
-    font-size: 16px;
     text-align: left;
+	margin-left: 0.5em;
+	font-size: 1em;
+	line-height:1em;
 }
+
+.btn.logout {
+	background: #34495E;
+	border-color: #34495E;
+	color: #FFFFFF;
+}
+
+.btn.restart {
+	background: #7F8C8D;
+	border-color: #7F8C8D;
+	color: #FFFFFF;
+}
+
+.btn.clear {
+	background: #BDC3C7;
+	border-color: #BDC3C7;
+	color: #FFFFFF;
+}
+

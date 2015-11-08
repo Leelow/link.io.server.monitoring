@@ -17,18 +17,18 @@ function webConsole(socket, showLoading) {
 	}
 	
 	// Logout button
-	$('.btn-logout').click(function() {
+	$('.btn.logout').click(function() {
 		Cookies.remove('credentials');
 		window.location.href = '/';
 	});
 	
 	// Restart button
-	$('.btn-restart').click(function() {
+	$('.btn.restart').click(function() {
 		socket.emit('restart', true);
 	});
 
 	// Clear button
-	$('.btn-clear').click(function() {
+	$('.btn.clear').click(function() {
 		$('#log-output').html('');
 		$('#log-event').html('');
 	});
@@ -73,44 +73,60 @@ function whileLoading(socket) {
 		var type = res[0];
 		
 		if(type == 'INFO')
-			addLog(msg.ts, msg.type, msg.text, true);
+			addLog(msg.type, msg.text, true);
 		else if(type == 'EVENT')
 			addEvent(arr.slice(1)[0]);
 		else
-			addLog(msg.ts, msg.type, msg.text, true);
+			addLog(msg.type, msg.text, true);
 	});
 	
 }
 
-function convertToLog(ts, type, str, printDate) {
-
-	var date_str = (printDate ? getDatePrefix(false) + ' ' : '');
-	type='';
-	return date_str + str;
+function convertToLog(type, str) {
+	return getDatePrefix(true, false) + ' ' + str;
 }
 
-function getDatePrefix(ms) {
+function getDatePrefix(full, ms) {
 
 	var d = new Date();
-	var date_str = '[' + d.getFullYear()                                         + '-' +
-					   ((d.getMonth() + 1) < 10 ? '0' : '') + (d.getMonth() + 1) + '-' +
-						(d.getDate()       < 10 ? '0' : '') + d.getDate()        + ' ' +
-						(d.getHours()      < 10 ? '0' : '') + d.getHours()       + ':' +
-						(d.getMinutes()    < 10 ? '0' : '') + d.getMinutes()     + ':' +
-						(d.getSeconds()    < 10 ? '0' : '') + d.getSeconds()     +
-						(ms ? ':' + minDigits(d.getMilliseconds(), 3) : '') + ']';
+	var date_str = '[';
+	if(full) {
+		date_str +=           d.getFullYear()      + '-' +
+				    minDigits(d.getMonth() + 1, 2) + '-' +
+				    minDigits(d.getDate(), 2)      + ' ';		
+	}
+	
+	date_str += minDigits(d.getHours(), 2)   + ':' +
+				minDigits(d.getMinutes(), 2) + ':' +
+				minDigits(d.getSeconds(), 2);
+	
+	if(ms) {
+		date_str += ':' + minDigits(d.getMilliseconds(), 3);
+		
+	}
+		
+	
+	// var date_str = '[' + d.getFullYear()                                         + '-' +
+					   // ((d.getMonth() + 1) < 10 ? '0' : '') + (d.getMonth() + 1) + '-' +
+						// (d.getDate()       < 10 ? '0' : '') + d.getDate()        + ' ' +
+						// (d.getHours()      < 10 ? '0' : '') + d.getHours()       + ':' +
+						// (d.getMinutes()    < 10 ? '0' : '') + d.getMinutes()     + ':' +
+						// (d.getSeconds()    < 10 ? '0' : '') + d.getSeconds()     +
+						// (ms ? ':' + minDigits(d.getMilliseconds(), 3) : '') + ']';
 						
-	return date_str;
+	return date_str + ']';
 	
 }
 
 function addLog(ts, type, str, printDate) {
 
-	$('#log-output').append("<div class='cmd " + type + "'>" + convertToLog(ts, type, str, printDate) + "</div>");
+	var logOutput = $('#log-output');
+	var children = logOutput.children();
 	
-	// Scroll to the bottom of the window if necessary
-	//window.scrollTo(0, document.body.scrollHeight);
-	scrollBottom($('#log-output'));
+	if(children.size() == 0)
+		logOutput.append("<div class='cmd " + type + "'>" + convertToLog(ts, type, str, printDate) + "</div>");
+	else
+		children.first().before("<div class='cmd " + type + "'>" + convertToLog(ts, type, str, printDate) + "</div>");
 	
 }
 
@@ -120,10 +136,16 @@ function addEvent(event_str) {
 	var id = 'json-renderer-' + Math.round((Math.random() * 10000000), 10000000);
 
 	// Set the name
-	var prefix = getDatePrefix(true) + ' Event';
+	var prefix = getDatePrefix(false, true) + ' Event';
 	
 	// Add a new json renderer
-	$('#log-event').append('<pre id="' + id + '"></pre>');
+	var logEvent = $('#log-event');
+	var children = logEvent.children();
+	
+	if(children.size() == 0)
+		logEvent.append('<pre id="' + id + '"></pre>');
+	else
+		children.first().before('<pre id="' + id + '"></pre>');
 
 	// Get the renderer
 	var jsonRenderer = $('#' + id);
@@ -162,9 +184,6 @@ function addEvent(event_str) {
 		isCollapsed = !isCollapsed;
 	});	
 	
-	scrollBottom($('#log-event'));
-	console.log('scroll');
-	
 }
 
 function updateServerState(active) {
@@ -187,13 +206,6 @@ function updateTitle() {
 		$('#toolbar span.title').text('Link.IO monitoring console (v' + infos.link_io_server_monitoring.version + ')');
 	});
 
-}
-
-function scrollBottom(div) {
-	
-	//div.animate({ scrollTop: $(document).height() }, "fast");
-	div.attr({ scrollTop: div.attr("scrollHeight") });
-	
 }
 
 function minDigits(n, digits) {
