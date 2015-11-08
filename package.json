@@ -2,7 +2,7 @@
   "name": "link.IO.server.monitoring",
   "url": "https://github.com/Leelow/link.io.server.monitoring",
   "author": "Leo Lozach <Leelow> <leo.lozach@gmail.com>",
-  "version": "0.8.1",
+  "version": "1.0.0",
   "dependencies": {
     "express": "^4.13.3",
     "finalhandler": "^0.4.0",
