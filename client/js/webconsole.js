@@ -74,7 +74,7 @@ function whileLoading(socket) {
 
 		var logs_array = oldLogs.split('\n');
 		for(var i = 0; i < logs_array.length; i++){
-			addLog('old', logs_array[i], false); //TODo timestamp
+			addLog('old', logs_array[i], false);
 		}
 	});
 
@@ -96,63 +96,52 @@ function whileLoading(socket) {
 		var level = res[1];
 
 		if(type == 'INFO')
-			addLog(msg.type, msg.text);
+			addLog(msg.type, msg.text, true, true, false);
 		else if(type == 'EVENT')
 			addEvent(arr.slice(1)[0]);
 		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
 			addEventsPerSecond(arr[2]);
 		else
-			addLog(msg.type, msg.text);
+			addLog(msg.type, msg.text, true, true, false);
 	});
 	
 }
 
-function convertToLog(str) {
-	return getDatePrefix(true, false) + ' ' + str;
+function convertToLog(str, full, ms) {
+	return getDatePrefix(full, ms) + ' ' + str;
 }
 
 function getDatePrefix(full, ms) {
 
 	var d = new Date();
 	var date_str = '[';
-	if(full) {
+	if(full)
 		date_str +=           d.getFullYear()      + '-' +
 				    minDigits(d.getMonth() + 1, 2) + '-' +
-				    minDigits(d.getDate(), 2)      + ' ';		
-	}
+				    minDigits(d.getDate(), 2)      + ' ';
 	
 	date_str += minDigits(d.getHours(), 2)   + ':' +
 				minDigits(d.getMinutes(), 2) + ':' +
 				minDigits(d.getSeconds(), 2);
 	
-	if(ms) {
+	if(ms)
 		date_str += ':' + minDigits(d.getMilliseconds(), 3);
-		
-	}
-		
-	
-	// var date_str = '[' + d.getFullYear()                                         + '-' +
-					   // ((d.getMonth() + 1) < 10 ? '0' : '') + (d.getMonth() + 1) + '-' +
-						// (d.getDate()       < 10 ? '0' : '') + d.getDate()        + ' ' +
-						// (d.getHours()      < 10 ? '0' : '') + d.getHours()       + ':' +
-						// (d.getMinutes()    < 10 ? '0' : '') + d.getMinutes()     + ':' +
-						// (d.getSeconds()    < 10 ? '0' : '') + d.getSeconds()     +
-						// (ms ? ':' + minDigits(d.getMilliseconds(), 3) : '') + ']';
 						
 	return date_str + ']';
 	
 }{}
 
-function addLog(type, str) {
-	if(type != 'old') {
+function addLog(type, str, printDate, full, ms) {
+
 		var logOutput = $('#log-output');
 		var children = logOutput.children();
 
+		var log = (printDate ? convertToLog(str, full, ms) : str);
+
 		if (children.size() == 0)
-			logOutput.append("<div class='cmd " + type + "'>" + convertToLog(str) + "</div>");
+			logOutput.append("<div class='cmd " + type + "'>" + log + "</div>");
 		else
-			children.first().before("<div class='cmd " + type + "'>" + convertToLog(str) + "</div>");
-	}
+			children.first().before("<div class='cmd " + type + "'>" + log + "</div>");
 	
 }
 
