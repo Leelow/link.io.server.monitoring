@@ -3,18 +3,31 @@ var eventsPerSecondConfig = {
 		labels: [],
 		datasets: [
 			{
-				fillColor: "rgba(220,220,220,0.2)",
-				strokeColor: "rgba(220,220,220,1)",
-				pointColor: "rgba(220,220,220,1)",
-				pointStrokeColor: "#fff",
+				fillColor: "rgba(101, 163, 63, 0.2)",
+				strokeColor: "rgb(101, 163, 63)",
+				pointColor: "rgba(0, 0, 0, 0)",
+				pointStrokeColor: "rgba(0, 0, 0, 0)",
+				pointHighlightFill: "rgba(0, 0, 0, 0)",
+				pointHighlightStroke: "rgba(0, 0, 0, 0)",
 				data: []
-		}]
+			},
+			{
+				fillColor: "rgba(230, 126, 34, 0.2)",
+				strokeColor: "rgba(230, 126, 34,1.0)",
+				pointColor: "rgba(0, 0, 0, 0)",
+				pointStrokeColor: "rgba(0, 0, 0, 0)",
+				pointHighlightFill: "rgba(0, 0, 0, 0)",
+				pointHighlightStroke: "rgba(0, 0, 0, 0)",
+				data: []
+			}
+		]
 	},
-	maxValues: 60, //1 minute
+	maxValues: 30, //30 secondes
 	chart: undefined
 };
 var maxEventToKeep = 100;
 var currentEventID = 0;
+var currentSizeofEvents = 0;
 
 function webConsole(socket, showLoading) {
 	
@@ -54,7 +67,10 @@ function webConsole(socket, showLoading) {
 	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
 
 	var ctx = document.getElementById("eventsCanvas").getContext("2d");
-	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {animationSteps: 15});
+	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {
+		animationSteps: 15,
+		scaleUse2Y: true
+	});
 }
 
 
@@ -172,6 +188,7 @@ function addEvent(event_str) {
 	
 	// Deserialize data
 	var event = JSON.parse(event_str);
+	currentSizeofEvents += sizeof(event);
 	
 	// Put data in the renderer
 	jsonRenderer.jsonViewer(event);
@@ -198,22 +215,21 @@ function addEvent(event_str) {
 	// Bind a new event to show the name when the renderer is collaspe manually
 	var isCollapsed = true;
 	jsonRenderer.find('a.json-toggle').first().click(function() {
-		if(!isCollapsed) {
-			console.log(jsonRenderer.find('ul.json-dict').first().next());
-		}
 		isCollapsed = !isCollapsed;
 	});
 }
 
 function addEventsPerSecond(nb) {
 	var now = new Date();
-	eventsPerSecondConfig.chart.addData([nb], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
+	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
 
 	if(now.getSeconds()%5 != 0)
 		eventsPerSecondConfig.chart.scale.xLabels[eventsPerSecondConfig.chart.scale.xLabels.length - 1] = "";
 
 	if(eventsPerSecondConfig.chart.scale.xLabels.length > eventsPerSecondConfig.maxValues)
 		eventsPerSecondConfig.chart.removeData();
+
+	currentSizeofEvents = 0;
 }
 
 function updateServerState(active) {
@@ -258,4 +274,38 @@ function getMonitoringServerUrl(func) {
 		func(infos.link_io_server_monitoring.url);
 	});
 	
+}
+
+function sizeof( object ) {
+
+	var objectList = [];
+	var stack = [ object ];
+	var bytes = 0;
+
+	while ( stack.length ) {
+		var value = stack.pop();
+
+		if ( typeof value === 'boolean' ) {
+			bytes += 4;
+		}
+		else if ( typeof value === 'string' ) {
+			bytes += value.length * 2;
+		}
+		else if ( typeof value === 'number' ) {
+			bytes += 8;
+		}
+		else if
+		(
+			typeof value === 'object'
+			&& objectList.indexOf( value ) === -1
+		)
+		{
+			objectList.push( value );
+
+			for( var i in value ) {
+				stack.push( value[ i ] );
+			}
+		}
+	}
+	return bytes;
 }
