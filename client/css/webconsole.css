@@ -1,7 +1,6 @@
 #webconsole {
-	
 	display: none;
-	
+    position: relative;
 }
 
 .container {
