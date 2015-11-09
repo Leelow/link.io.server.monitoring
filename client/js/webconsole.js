@@ -29,6 +29,9 @@ var maxEventToKeep = 100;
 var currentEventID = 0;
 var currentSizeofEvents = 0;
 
+
+Chart.defaults.global.scaleFontColor = "#fff";
+
 function webConsole(socket, showLoading) {
 	
 	// If we want to show loading form
@@ -217,6 +220,7 @@ function addEvent(event_str) {
 }
 
 function addEventsPerSecond(nb) {
+
 	var now = new Date();
 	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
 
@@ -234,10 +238,10 @@ function updateServerState(active) {
 	// Update toolbar color and buttons states
 	if (active) {
 		$('#toolbar').css('background', '#65A33F');
-		$('.btn-restart').attr("disabled", true);
+		$('.btn.restart').attr("disabled", true);
 	} else {
 		$('#toolbar').css('background', '#D23339');
-		$('.btn-restart').attr("disabled", false);
+		$('.btn.restart').attr("disabled", false);
 	}
 
 }
