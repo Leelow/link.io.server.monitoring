@@ -64,6 +64,7 @@ html, body {
     background-color: #22252a;
 	overflow-y: scroll;
 	padding-left: 15px;
+    height: calc(100% - 250px);
 }
 
 #log-event {
@@ -74,7 +75,7 @@ html, body {
 }
 
 #eventsChart {
-    width: 35%;
+    width: 100%;
     height: 250px;
     position: absolute;
     bottom: 0;

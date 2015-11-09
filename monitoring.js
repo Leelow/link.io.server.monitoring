@@ -80,10 +80,7 @@ io.on('connection', function (socket) {
 
                 // Allow the user to restart the server after a crash
                 socket.on('restart', function () {
-
-                    if (!serverState)
-                        execScript(script_path, script_arguments);
-
+                    execScript(script_path, script_arguments);
                 })
 
             }
@@ -122,7 +119,7 @@ function execScript(file, args) {
 
     // Listen for any errors:
     child.stderr.on('data', function (data) {
-
+        console.log(data);
         console.log('There was an error: ' + data);
         child.kill('SIGINT');
 

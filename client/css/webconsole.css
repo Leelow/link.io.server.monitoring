@@ -56,3 +56,12 @@
 	color: #FFFFFF;
 }
 
+.error-head {
+	color: red;
+	cursor: pointer;
+}
+
+.error-stack {
+	color: red;
+	cursor: pointer;
+}

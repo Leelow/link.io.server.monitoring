@@ -9,6 +9,7 @@ var eventsPerSecondConfig = {
 				pointStrokeColor: "rgba(0, 0, 0, 0)",
 				pointHighlightFill: "rgba(0, 0, 0, 0)",
 				pointHighlightStroke: "rgba(0, 0, 0, 0)",
+				scaleGridLineColor  : '<%=value%> events',
 				data: []
 			},
 			{
@@ -22,7 +23,7 @@ var eventsPerSecondConfig = {
 			}
 		]
 	},
-	maxValues: 30, //30 secondes
+	maxValues: 180,
 	chart: undefined
 };
 var maxEventToKeep = 100;
@@ -72,7 +73,8 @@ function webConsole(socket, showLoading) {
 	var ctx = document.getElementById("eventsCanvas").getContext("2d");
 	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {
 		animationSteps: 15,
-		scaleUse2Y: true
+		scaleUse2Y: true,
+		pointDot: false
 	});
 }
 
@@ -93,7 +95,16 @@ function whileLoading(socket) {
 		if(oldLogs != null) {
 			var logs_array = oldLogs.split('\n');
 			for (var i = 0; i < logs_array.length; i++) {
-				addLog('old', logs_array[i], false);
+				if(logs_array[i].indexOf('] ERROR') == 20) {
+					var error_stack = [logs_array[i]];
+					for(++i;logs_array[i].startsWith("    at "); i++) {
+						error_stack.push(logs_array[i]);
+					}
+					addErrorLog('old', error_stack, false);
+					i--;
+				}
+				else
+					addLog('old', logs_array[i], false);
 			}
 		}
 	});
@@ -119,6 +130,16 @@ function whileLoading(socket) {
 			addLog(msg.type, msg.text, true, true, false);
 		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
 			addEventsPerSecond(arr[2]);
+		else if(type == 'ERROR') {
+			var lines = msg.text.split('\n');
+			var error_stack = [lines[0]];
+			for(var i = 1; i<lines.length; i++) {
+				error_stack.push(lines[i]);
+			}
+
+			updateServerState(false);
+			addErrorLog('error', error_stack, true);
+		}
 		else
 			addLog(msg.type, msg.text, true, true, false);
 	});
@@ -126,7 +147,6 @@ function whileLoading(socket) {
 	socket.on('event', function(event) {
 		addEvent(event);
 	})
-	
 }
 
 function convertToLog(str, full, ms) {
@@ -153,8 +173,7 @@ function getDatePrefix(full, ms) {
 	
 }{}
 
-function addLog(type, str, printDate, full, ms) {
-
+function addLog(type, str, printDate, full, ms, isError) {
 		var logOutput = $('#log-output');
 		var children = logOutput.children();
 
@@ -165,6 +184,25 @@ function addLog(type, str, printDate, full, ms) {
 		else
 			children.first().before("<div class='cmd " + type + "'>" + log + "</div>");
 	
+}
+
+function addErrorLog(type, stack, printDate) {
+	var logOutput = $('#log-output');
+	stack[0] = (printDate ? convertToLog(stack[0], true, false) : stack[0]);
+
+	var elem = $("<div class='cmd " + type + "'></div>");
+	var stackElem = $("<div class='error-stack'></div>");
+	elem.append($("<div class='error-head'>" + stack[0] + "</div>"));
+	elem.append(stackElem)
+
+	for(var i = 1; i<stack.length; i++)
+		stackElem.append($("<div class='error-stack-line'>" + stack[i] + "</div>"))
+
+	stackElem.hide();
+	elem.click(function() {
+		stackElem.slideToggle();
+	});
+	logOutput.prepend(elem);
 }
 
 function addEvent(event) {
