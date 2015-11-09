@@ -22,7 +22,7 @@ $(document).ready(function() {
 				var credentials = JSON.parse(credentialsCookie)
 
 				// Connect to the server
-				socket = io.connect(url);
+				socket = io.connect(url + "?user=client");
 				socket.on('connect', function () {
 						
 					socket.on('resCheckCredentials', function(res) {

@@ -14,6 +14,7 @@ configurator.generatePublicInfosFile();
 // Configuration
 var port = configurator.getLinkIOMonitoringServerPort();
 var script_path = configurator.getLinkIOServerScript();
+var script_arguments = configurator.getLinkIOServerArguments();
 var logsUrl = 'http://' + configurator.getLinkIOServerHost() + ':' + configurator.getLinkIOServerPort();
 
 // State signal
@@ -35,49 +36,61 @@ console.log('Link.io.server.monitoring (v' + version + ') started on *:' + port)
 // Server state
 var serverState = false;
 
+// Server socket
+var socketServer = undefined;
+
 // On user connection
 io.on('connection', function (socket) {
-
     var firstAuth = true;
     var isAuth = false;
 
-    // On user auth-ask
-    socket.on('checkCredentials', function(credentials) {
 
-        // Check credentials
-        isAuth = configurator.checkCredentials(credentials.login, credentials.password);
-        socket.emit('resCheckCredentials', isAuth);
+    if(socket.handshake.query.user == 'server') {
+        socketServer = socket;
 
-        // If the user is authentificated
-        if(isAuth && firstAuth) {
-            firstAuth = false;
+        socketServer.on('event', function(event) {
+            console.log(event.type);
+            io.to('auth-room').emit('event', event);
+        })
+    }
+    else if(socket.handshake.query.user == 'client') {
+        // On user auth-ask
+        socket.on('checkCredentials', function (credentials) {
 
-            console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
+            // Check credentials
+            isAuth = configurator.checkCredentials(credentials.login, credentials.password);
+            socket.emit('resCheckCredentials', isAuth);
 
-            socket.join('auth-room');
+            // If the user is authentificated
+            if (isAuth && firstAuth) {
+                firstAuth = false;
 
-            socket.on('retrieveData', function() {
+                console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
 
-                // Send old logs
-                sendOldLogs(socket);
+                socket.join('auth-room');
 
-                // Emit server state
-                socket.emit('serverState', serverState);
+                socket.on('retrieveData', function () {
 
-            });
+                    // Send old logs
+                    sendOldLogs(socket);
 
-            // Allow the user to restart the server after a crash
-            socket.on('restart', function () {
+                    // Emit server state
+                    socket.emit('serverState', serverState);
 
-                if(!serverState)
-                    execScript(script_path);
+                });
 
-            })
+                // Allow the user to restart the server after a crash
+                socket.on('restart', function () {
 
-        }
+                    if (!serverState)
+                        execScript(script_path, script_arguments);
 
-    });
+                })
 
+            }
+
+        });
+    }
 });
 
 function sendOldLogs(socket) {
@@ -92,7 +105,7 @@ function sendOldLogs(socket) {
 }
 
 // Exec the command and handle std
-function execScript(file) {
+function execScript(file, args) {
 
     serverState = true;
     io.to('auth-room').emit('serverState', serverState);
@@ -100,7 +113,7 @@ function execScript(file) {
     console.log('Command executed : "node ' + file + '".');
 
     // Run node with the child.js file as an argument
-    var child = spawn('node', [file]);
+    var child = spawn('node', [file].concat(args));
 
 
     child.stdout.on('data', function (data) {
@@ -123,4 +136,4 @@ function execScript(file) {
 
 }
 
-execScript(script_path);
+execScript(script_path, script_arguments);

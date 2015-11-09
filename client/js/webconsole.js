@@ -87,10 +87,11 @@ function whileLoading(socket) {
 
 	// On olg logs receiving
 	socket.on('getOldLogs', function (oldLogs) {
-
-		var logs_array = oldLogs.split('\n');
-		for(var i = 0; i < logs_array.length; i++){
-			addLog('old', logs_array[i], false);
+		if(oldLogs != null) {
+			var logs_array = oldLogs.split('\n');
+			for (var i = 0; i < logs_array.length; i++) {
+				addLog('old', logs_array[i], false);
+			}
 		}
 	});
 
@@ -113,13 +114,15 @@ function whileLoading(socket) {
 
 		if(type == 'INFO')
 			addLog(msg.type, msg.text, true, true, false);
-		else if(type == 'EVENT')
-			addEvent(arr.slice(1)[0]);
 		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
 			addEventsPerSecond(arr[2]);
 		else
 			addLog(msg.type, msg.text, true, true, false);
 	});
+
+	socket.on('event', function(event) {
+		addEvent(event);
+	})
 	
 }
 
@@ -161,7 +164,7 @@ function addLog(type, str, printDate, full, ms) {
 	
 }
 
-function addEvent(event_str) {
+function addEvent(event) {
 	// Compute an unique id
 	var id = 'json-renderer-' + (currentEventID++);
 
@@ -179,9 +182,8 @@ function addEvent(event_str) {
 	// Get the renderer
 	var jsonRenderer = $('#' + id);
 	
-	// Deserialize data
-	var event = JSON.parse(event_str);
-	var eventSize = event_str.length;
+	// Get event size
+	var eventSize = JSON.stringify(event).length;
 	currentSizeofEvents += eventSize;
 
 	// Set the name
@@ -234,10 +236,10 @@ function updateServerState(active) {
 	// Update toolbar color and buttons states
 	if (active) {
 		$('#toolbar').css('background', '#65A33F');
-		$('.btn-restart').attr("disabled", true);
+		$('.btn.restart').attr("disabled", true);
 	} else {
 		$('#toolbar').css('background', '#D23339');
-		$('.btn-restart').attr("disabled", false);
+		$('.btn.restart').attr("disabled", false);
 	}
 
 }

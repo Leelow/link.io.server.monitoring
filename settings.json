@@ -10,6 +10,7 @@
   },
   "link_io_server": {
     "script": "../link.io.server/server.js",
+    "arguments": ["monitoring=8081"],
     "host": "localhost",
     "port": 8080
   }
