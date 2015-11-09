@@ -79,10 +79,6 @@ html, body {
     position: absolute;
     bottom: 0;
     right: 0;
-
-    background-color: white;
-}
-
-#eventsChart .wrapper {
-    margin: 0 5px;
+    padding: 10px 10px;
+    background-color: #22252a;
 }

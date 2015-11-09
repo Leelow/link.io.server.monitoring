@@ -1,7 +1,7 @@
 var spawn = require('child_process').spawn;
 var http = require('http');
 var serveStatic = require('serve-static');
-var finalHandler = require('finalHandler');
+var finalHandler = require('finalhandler');
 var request = require('request');
 
 // Necessary to get the configs

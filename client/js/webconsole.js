@@ -29,6 +29,9 @@ var maxEventToKeep = 100;
 var currentEventID = 0;
 var currentSizeofEvents = 0;
 
+
+Chart.defaults.global.scaleFontColor = "#fff";
+
 function webConsole(socket, showLoading) {
 	
 	// If we want to show loading form
@@ -219,6 +222,7 @@ function addEvent(event) {
 }
 
 function addEventsPerSecond(nb) {
+
 	var now = new Date();
 	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
 
