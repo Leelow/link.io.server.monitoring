@@ -11,9 +11,41 @@
 	color: #FF0000;
 }
 
-#webconsole .logo-linkio {
+.logo-wrapper {
+	position: relative;
+	top: -11px;
+}
+
+.logo-wrapper .logo-linkio {
 	height:1.5em;
 	margin-right:0.5em;
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: rotateY(0deg);
+	transition: 0.5s;
+	opacity: 1;
+}
+
+.logo-wrapper:hover .logo-linkio {
+	transform: rotateY(180deg);
+	opacity: 0;
+}
+
+.logo-wrapper .logo-cookie {
+	height:1.5em;
+	margin-right:0.5em;
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: rotateY(180deg);
+	transition: 0.5s;
+	opacity: 0;
+}
+
+.logo-wrapper:hover .logo-cookie {
+	transform: rotateY(0deg);
+	opacity: 1;
 }
 
 .btn {

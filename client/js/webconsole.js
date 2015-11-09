@@ -262,7 +262,7 @@ function addEvent(event) {
 function addEventsPerSecond(nb) {
 
 	var now = new Date();
-	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], now.getHours() + ':' + now.getMinutes() + ":" + (now.getSeconds() < 10 ? '0' + now.getSeconds() : now.getSeconds()));
+	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], minDigits(now.getHours(), 2) + ':' + minDigits(now.getMinutes(), 2) + ":" + minDigits(now.getSeconds(), 2));
 
 	if(now.getSeconds()%5 != 0)
 		eventsPerSecondConfig.chart.scale.xLabels[eventsPerSecondConfig.chart.scale.xLabels.length - 1] = "";

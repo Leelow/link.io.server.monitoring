@@ -38,6 +38,7 @@ html, body {
 	flex:1;
 	padding-right:0.5em;
 	text-align: right;
+    margin-right: 40px;
 }
 .container {
     display: flex;
