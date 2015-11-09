@@ -264,7 +264,7 @@ function addEventsPerSecond(nb) {
 	var now = new Date();
 	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], minDigits(now.getHours(), 2) + ':' + minDigits(now.getMinutes(), 2) + ":" + minDigits(now.getSeconds(), 2));
 
-	if(now.getSeconds()%5 != 0)
+	if(eventsPerSecondConfig.chart.scale.xLabels.length%5 != 0)
 		eventsPerSecondConfig.chart.scale.xLabels[eventsPerSecondConfig.chart.scale.xLabels.length - 1] = "";
 
 	if(eventsPerSecondConfig.chart.scale.xLabels.length > eventsPerSecondConfig.maxValues)
