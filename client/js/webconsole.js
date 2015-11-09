@@ -67,15 +67,6 @@ function webConsole(socket, showLoading) {
 		$('#log-output').html('');
 		$('#log-event').html('');
 	});
-
-	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
-
-	var ctx = document.getElementById("eventsCanvas").getContext("2d");
-	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {
-		animationSteps: 15,
-		scaleUse2Y: true,
-		pointDot: false
-	});
 }
 
 
@@ -86,6 +77,15 @@ function whileLoading(socket) {
 	
 	// Prepare web console displaying
 	$('#webconsole').show();
+
+	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
+
+	var ctx = document.getElementById("eventsCanvas").getContext("2d");
+	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {
+		animationSteps: 15,
+		scaleUse2Y: true,
+		pointDot: false
+	});
 	
 	// Update the page title
 	updateTitle();
