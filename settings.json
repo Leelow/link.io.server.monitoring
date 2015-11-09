@@ -1,16 +1,18 @@
 {
   "link_io_server_monitoring": {
-    "login": "camia",
+    "login": "1",
     "password": {
-      "value": "VG2mrDuTEXFXgc6fc033152f4d0ec96ca2f5d9b9538f53b005123",
+      "value": "insV9PZgOX2cRabbb828f8ba45ddaf33f799c1b49d234fc4fd764",
       "isHashed": true
     },
-    "host": "40.124.44.81",
-    "port": 443
+    "host": "localhost",
+    "port": 8081
   },
   "link_io_server": {
     "script": "../link.io.server/server.js",
-    "arguments": ["monitoring=8081"],
+    "arguments": [
+      "monitoring=8081"
+    ],
     "host": "localhost",
     "port": 8080
   }

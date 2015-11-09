@@ -49,11 +49,10 @@ io.on('connection', function (socket) {
         socketServer = socket;
 
         socketServer.on('event', function(event) {
-            console.log(event.type);
             io.to('auth-room').emit('event', event);
         })
     }
-    else if(socket.handshake.query.user == 'client') {
+    else {
         // On user auth-ask
         socket.on('checkCredentials', function (credentials) {
 

@@ -54,7 +54,6 @@ $(document).ready(function() {
 		});
 		
 	}, function() {
-			
 		// If cookies credentials are wrong or don't exist	
 		if(credentialsCookie == undefined || !areCredentialsCookieGood) {
 				
@@ -62,7 +61,6 @@ $(document).ready(function() {
 			
 			// Checking response
 			socket.on('resCheckCredentials', function(res) {
-
 				// To avoid twice activation
 				if(!isAuth) {
 				
