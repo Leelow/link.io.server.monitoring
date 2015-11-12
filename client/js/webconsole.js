@@ -1,37 +1,7 @@
-var eventsPerSecondConfig = {
-	datas: {
-		labels: [],
-		datasets: [
-			{
-				fillColor: "rgba(101, 163, 63, 0.2)",
-				strokeColor: "rgb(101, 163, 63)",
-				pointColor: "rgba(0, 0, 0, 0)",
-				pointStrokeColor: "rgba(0, 0, 0, 0)",
-				pointHighlightFill: "rgba(0, 0, 0, 0)",
-				pointHighlightStroke: "rgba(0, 0, 0, 0)",
-				scaleGridLineColor  : '<%=value%> events',
-				data: []
-			},
-			{
-				fillColor: "rgba(230, 126, 34, 0.2)",
-				strokeColor: "rgba(230, 126, 34,1.0)",
-				pointColor: "rgba(0, 0, 0, 0)",
-				pointStrokeColor: "rgba(0, 0, 0, 0)",
-				pointHighlightFill: "rgba(0, 0, 0, 0)",
-				pointHighlightStroke: "rgba(0, 0, 0, 0)",
-				data: []
-			}
-		]
-	},
-	maxValues: 180,
-	chart: undefined
-};
-var maxEventToKeep = 100;
+var linkChart;
 var currentEventID = 0;
 var currentSizeofEvents = 0;
-
-
-Chart.defaults.global.scaleFontColor = "#fff";
+var maxEventToKeep = 100;
 
 function webConsole(socket, showLoading) {
 	
@@ -80,12 +50,9 @@ function whileLoading(socket) {
 
 	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
 
+
 	var ctx = document.getElementById("eventsCanvas").getContext("2d");
-	eventsPerSecondConfig.chart = new Chart(ctx).Line(eventsPerSecondConfig.datas, {
-		animationSteps: 15,
-		scaleUse2Y: true,
-		pointDot: false
-	});
+	linkChart = new LinkChart(ctx);
 	
 	// Update the page title
 	updateTitle();
@@ -128,8 +95,6 @@ function whileLoading(socket) {
 
 		if(type == 'INFO')
 			addLog(msg.type, msg.text, true, true, false);
-		else if(type == 'MONITORING' && level == 'EVENTS_PER_SECOND')
-			addEventsPerSecond(arr[2]);
 		else if(type == 'ERROR') {
 			var lines = msg.text.split('\n');
 			var error_stack = [lines[0]];
@@ -146,7 +111,15 @@ function whileLoading(socket) {
 
 	socket.on('event', function(event) {
 		addEvent(event);
-	})
+	});
+
+	socket.on('monitoring', function(monitoringData) {
+		linkChart.newMonitoringData(monitoringData);
+	});
+
+	socket.on('oldMonitoring', function(oldMonitoringData) {
+		linkChart.oldMonitoringData(oldMonitoringData);
+	});
 }
 
 function convertToLog(str, full, ms) {
@@ -222,13 +195,9 @@ function addEvent(event) {
 
 	// Get the renderer
 	var jsonRenderer = $('#' + id);
-	
-	// Get event size
-	var eventSize = JSON.stringify(event).length;
-	currentSizeofEvents += eventSize;
 
 	// Set the name
-	var prefix = getDatePrefix(false, true) + ' ' + event.type + ' (' + humanFileSize(eventSize, true) + ')';
+	var prefix = getDatePrefix(false, true) + ' ' + event.type + ' (' + humanFileSize(JSON.stringify(event).length, true) + ')';
 	
 	// Put data in the renderer
 	jsonRenderer.jsonViewer(event);
@@ -261,16 +230,7 @@ function addEvent(event) {
 
 function addEventsPerSecond(nb) {
 
-	var now = new Date();
-	eventsPerSecondConfig.chart.addData([nb, currentSizeofEvents / 1000], minDigits(now.getHours(), 2) + ':' + minDigits(now.getMinutes(), 2) + ":" + minDigits(now.getSeconds(), 2));
 
-	if(eventsPerSecondConfig.chart.scale.xLabels.length%5 != 0)
-		eventsPerSecondConfig.chart.scale.xLabels[eventsPerSecondConfig.chart.scale.xLabels.length - 1] = "";
-
-	if(eventsPerSecondConfig.chart.scale.xLabels.length > eventsPerSecondConfig.maxValues)
-		eventsPerSecondConfig.chart.removeData();
-
-	currentSizeofEvents = 0;
 }
 
 function updateServerState(active) {
@@ -316,40 +276,6 @@ function getMonitoringServerUrl(func) {
 		func('http://' + infos.link_io_server_monitoring.host + ':' +infos.link_io_server_monitoring.port);
 	});
 
-}
-
-function sizeof( object ) {
-
-	var objectList = [];
-	var stack = [ object ];
-	var bytes = 0;
-
-	while ( stack.length ) {
-		var value = stack.pop();
-
-		if ( typeof value === 'boolean' ) {
-			bytes += 4;
-		}
-		else if ( typeof value === 'string' ) {
-			bytes += value.length;
-		}
-		else if ( typeof value === 'number' ) {
-			bytes += 8;
-		}
-		else if
-		(
-			typeof value === 'object'
-			&& objectList.indexOf( value ) === -1
-		)
-		{
-			objectList.push( value );
-
-			for( var i in value ) {
-				stack.push( value[ i ] );
-			}
-		}
-	}
-	return bytes;
 }
 
 function humanFileSize(bytes, si) {

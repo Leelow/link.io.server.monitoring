@@ -3,6 +3,9 @@ var http = require('http');
 var serveStatic = require('serve-static');
 var finalHandler = require('finalhandler');
 var request = require('request');
+var chartData = require('./lib/chart.data.js');
+var isWin = /^win/.test(process.platform);
+var os  = require('os-utils');
 
 // Necessary to get the configs
 var configurator = require('./lib/configurator.js')();
@@ -38,6 +41,7 @@ var serverState = false;
 
 // Server socket
 var socketServer = undefined;
+var pidServer = -1;
 
 // On user connection
 io.on('connection', function (socket) {
@@ -47,10 +51,25 @@ io.on('connection', function (socket) {
 
     if(socket.handshake.query.user == 'server') {
         socketServer = socket;
+        pidServer = socket.handshake.query.pid;
 
         socketServer.on('event', function(event) {
             io.to('auth-room').emit('event', event);
-        })
+            chartData.newEvent(event);
+        });
+
+        var cpuPercent = 0;
+
+        setInterval(function() {
+            os.cpuUsage(function(v){
+                cpuPercent = v;
+            });
+        }, 1000);
+
+        socketServer.on('monitoring', function(event) {
+            event.cpu = cpuPercent * 100;
+            io.to('auth-room').emit('monitoring', chartData.appendData(event));
+        });
     }
     else {
         // On user auth-ask
@@ -73,9 +92,11 @@ io.on('connection', function (socket) {
                     // Send old logs
                     sendOldLogs(socket);
 
+                    //Send old chart data
+                    socket.emit('oldMonitoring', chartData.getOldData());
+
                     // Emit server state
                     socket.emit('serverState', serverState);
-
                 });
 
                 // Allow the user to restart the server after a crash

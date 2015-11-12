@@ -84,3 +84,39 @@ html, body {
     padding: 10px 10px;
     background-color: #22252a;
 }
+/*
+.dataChooser {
+    width: 250px;
+    height: 250px;
+    display: inline-block;
+    position: relative;
+}
+
+.dataChooser ul {
+    list-style-type: none;
+    display: block;
+    padding: 0;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: absolute;
+    top: 5px;
+    left: 0;
+    right: 0;
+    bottom: 25px;
+}
+
+.dataChooser li {
+    display: block;
+    height: 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    font-size: 0.8em;
+    line-height: 25px;
+    padding-left: 15px;
+    cursor: pointer;
+}
+
+.wrapper {
+    display: inline-block;
+    height: 250px;
+    width: calc(100% - 255px);
+}*/
