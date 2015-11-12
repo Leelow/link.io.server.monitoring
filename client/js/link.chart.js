@@ -56,7 +56,7 @@ LinkChart.prototype.newMonitoringData = function(data) {
             if(typeof that.datas[key] == 'undefined')
                 that.datas[key] = [];
 
-            that.datas[key].push(event[key]);
+            that.datas[key].push(data[key]);
 
             if(that.datas[key].length > that.maxValues)
                 that.datas[key].splice(0, 1);
