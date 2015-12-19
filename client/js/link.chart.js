@@ -36,7 +36,7 @@ function LinkChart(ctx) {
         eventsPerSecond: [],
         eventsSize: []
     };
-    this.propertiesShow = ['eventsPerSecond', 'cpu'];
+    this.propertiesShow = ['eventsPerSecond', 'eventsSize'];
     this.maxValues = 180;
     this.counter = 0;
     this.chart = new Chart(this.ctx).Line(defaultData.datas, {

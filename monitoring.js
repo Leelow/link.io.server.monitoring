@@ -41,7 +41,6 @@ var serverState = false;
 
 // Server socket
 var socketServer = undefined;
-var pidServer = -1;
 
 // On user connection
 io.on('connection', function (socket) {
@@ -51,7 +50,6 @@ io.on('connection', function (socket) {
 
     if(socket.handshake.query.user == 'server') {
         socketServer = socket;
-        pidServer = socket.handshake.query.pid;
 
         socketServer.on('event', function(event) {
             io.to('auth-room').emit('event', event);
