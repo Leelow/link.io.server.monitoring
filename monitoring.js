@@ -4,8 +4,8 @@ var serveStatic = require('serve-static');
 var finalHandler = require('finalhandler');
 var request = require('request');
 var chartData = require('./lib/chart.data.js');
-var isWin = /^win/.test(process.platform);
-var os  = require('os-utils');
+var os = require('os-utils');
+var MongoClient = require('mongodb').MongoClient;
 
 // Necessary to get the configs
 var configurator = require('./lib/configurator.js')();
@@ -21,13 +21,13 @@ var script_arguments = configurator.getLinkIOServerArguments();
 var logsUrl = 'http://' + configurator.getLinkIOServerHost() + ':' + configurator.getLinkIOServerPort();
 
 // State signal
-var server = http.createServer(function(req, res) {
+var server = http.createServer(function (req, res) {
     var done = finalHandler(req, res);
     serve(req, res, done);
 });
 
 // Serve static files
-var serve = serveStatic("./client/");
+var serve = serveStatic("./static/");
 
 // Initialize socket.io
 var io = require('socket.io')(server);
@@ -42,75 +42,113 @@ var serverState = false;
 // Server socket
 var socketServer = undefined;
 
-// On user connection
-io.on('connection', function (socket) {
-    var firstAuth = true;
-    var isAuth = false;
+var _db = undefined;
+MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
+    _db = db;
+
+    // On user connection
+    io.on('connection', function (socket) {
+        var firstAuth = true;
+        var isAuth = false;
 
 
-    if(socket.handshake.query.user == 'server') {
-        socketServer = socket;
+        if (socket.handshake.query.user == 'server') { //Link.IO server <-> monitoring
+            socketServer = socket;
 
-        socketServer.on('event', function(event) {
-            io.to('auth-room').emit('event', event);
-            chartData.newEvent(event);
-        });
-
-        var cpuPercent = 0;
-
-        setInterval(function() {
-            os.cpuUsage(function(v){
-                cpuPercent = v;
+            socketServer.on('event', function (event) {
+                io.to('auth-room').emit('event', event);
+                chartData.newEvent(event);
             });
-        }, 1000);
 
-        socketServer.on('monitoring', function(event) {
-            event.cpu = cpuPercent * 100;
-            io.to('auth-room').emit('monitoring', chartData.appendData(event));
-        });
-    }
-    else {
-        // On user auth-ask
-        socket.on('checkCredentials', function (credentials) {
+            var cpuPercent = 0;
 
-            // Check credentials
-            isAuth = configurator.checkCredentials(credentials.login, credentials.password);
-            socket.emit('resCheckCredentials', isAuth);
-
-            // If the user is authentificated
-            if (isAuth && firstAuth) {
-                firstAuth = false;
-
-                console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
-
-                socket.join('auth-room');
-
-                socket.on('retrieveData', function () {
-
-                    // Send old logs
-                    sendOldLogs(socket);
-
-                    //Send old chart data
-                    socket.emit('oldMonitoring', chartData.getOldData());
-
-                    // Emit server state
-                    socket.emit('serverState', serverState);
+            setInterval(function () {
+                os.cpuUsage(function (v) {
+                    cpuPercent = v;
                 });
+            }, 1000);
 
-                // Allow the user to restart the server after a crash
-                socket.on('restart', function () {
-                    execScript(script_path, script_arguments);
-                })
+            socketServer.on('monitoring', function (event) {
+                event.cpu = cpuPercent * 100;
+                io.to('auth-room').emit('monitoring', chartData.appendData(event));
+            });
+        }
+        else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page
+            socket.on('insert', function (d) {
+                db.collection(d.table).insertOne(d.data);
+            });
 
-            }
+            socket.on('getAll', function (table, ack) {
+                db.collection(table).find().toArray(function (err, items) {
+                    ack(items);
+                });
+            });
 
-        });
-    }
+            socket.on('get', function (d, ack) {
+                db.collection(d.table).find(d.critera).toArray(function (err, items) {
+                    ack(items);
+                });
+            });
+
+            socket.on('updateOne', function (d) {
+                db.collection(d.table).updateOne(d.critera, d.data);
+            });
+
+            socket.on('updateMany', function (d) {
+                db.collection(d.table).updateMany(d.critera, d.data);
+            });
+
+            socket.on('deleteOne', function (d) {
+                db.collection(d.table).deleteOne(d.critera);
+            });
+
+            socket.on('deleteMany', function (d) {
+                db.collection(d.table).deleteMany(d.critera);
+            });
+        }
+        else {  //monitoring <-> monitoring web page
+            // On user auth-ask
+            socket.on('checkCredentials', function (credentials) {
+
+                // Check credentials
+                isAuth = configurator.checkCredentials(credentials.login, credentials.password);
+                socket.emit('resCheckCredentials', isAuth);
+
+                // If the user is authentificated
+                if (isAuth && firstAuth) {
+                    firstAuth = false;
+
+                    console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
+
+                    socket.join('auth-room');
+
+                    socket.on('retrieveData', function () {
+
+                        // Send old logs
+                        sendOldLogs(socket);
+
+                        //Send old chart data
+                        socket.emit('oldMonitoring', chartData.getOldData());
+
+                        // Emit server state
+                        socket.emit('serverState', serverState);
+                    });
+
+                    // Allow the user to restart the server after a crash
+                    socket.on('restart', function () {
+                        execScript(script_path, script_arguments);
+                    })
+
+                }
+
+            });
+        }
+    });
 });
 
 function sendOldLogs(socket) {
 
-    request(logsUrl, function(err, res, oldLogs) {
+    request(logsUrl, function (err, res, oldLogs) {
 
         // Send old logs
         socket.emit('getOldLogs', oldLogs);
@@ -132,7 +170,7 @@ function execScript(file, args) {
 
 
     child.stdout.on('data', function (data) {
-        io.to('auth-room').emit('message', {'type' : 'debug', 'text' : data+''});
+        io.to('auth-room').emit('message', {'type': 'debug', 'text': data + ''});
     });
 
 
@@ -144,11 +182,15 @@ function execScript(file, args) {
 
         serverState = false;
         io.to('auth-room').emit('serverState', serverState);
-        io.to('auth-room').emit('message', {'type' : 'error', 'text' : data+''});
-
-
+        io.to('auth-room').emit('message', {'type': 'error', 'text': data + ''});
     });
 
 }
+
+process.on('SIGINT', function () {
+    if(typeof _db != 'undefined') {
+        _db.close();
+    }
+});
 
 execScript(script_path, script_arguments);

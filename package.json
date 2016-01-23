@@ -6,6 +6,7 @@
   "dependencies": {
     "express": "^4.13.3",
     "finalhandler": "^0.4.0",
+    "mongodb": "^2.1.4",
     "os-utils": "0.0.14",
     "request": "^2.65.0",
     "serve-static": "^1.10.0",
