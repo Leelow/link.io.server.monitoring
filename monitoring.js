@@ -107,40 +107,22 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
             });
         }
         else {  //monitoring <-> monitoring web page
-            // On user auth-ask
-            socket.on('checkCredentials', function (credentials) {
+            socket.join('auth-room');
 
-                // Check credentials
-                isAuth = configurator.checkCredentials(credentials.login, credentials.password);
-                socket.emit('resCheckCredentials', isAuth);
+            socket.on('retrieveData', function () {
+                // Send old logs
+                sendOldLogs(socket);
 
-                // If the user is authentificated
-                if (isAuth && firstAuth) {
-                    firstAuth = false;
+                //Send old chart data
+                socket.emit('oldMonitoring', chartData.getOldData());
 
-                    console.log('New authentificated client : ' + socket.request.connection.remoteAddress);
+                // Emit server state
+                socket.emit('serverState', serverState);
+            });
 
-                    socket.join('auth-room');
-
-                    socket.on('retrieveData', function () {
-
-                        // Send old logs
-                        sendOldLogs(socket);
-
-                        //Send old chart data
-                        socket.emit('oldMonitoring', chartData.getOldData());
-
-                        // Emit server state
-                        socket.emit('serverState', serverState);
-                    });
-
-                    // Allow the user to restart the server after a crash
-                    socket.on('restart', function () {
-                        execScript(script_path, script_arguments);
-                    })
-
-                }
-
+            // Allow the user to restart the server after a crash
+            socket.on('restart', function () {
+                execScript(script_path, script_arguments);
             });
         }
     });

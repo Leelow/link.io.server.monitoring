@@ -57,7 +57,7 @@ $(document).ready(function() {
 
 function getMonitoringServerUrl(func) {
 
-    $.getJSON('../monitoring/infos.json', function(infos) {
+    $.getJSON('./infos.json', function(infos) {
         func('http://' + infos.link_io_server_monitoring.host + ':' +infos.link_io_server_monitoring.port);
     });
 }

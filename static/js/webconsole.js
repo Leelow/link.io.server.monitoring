@@ -3,24 +3,9 @@ var currentEventID = 0;
 var currentSizeofEvents = 0;
 var maxEventToKeep = 100;
 
-function webConsole(socket, showLoading) {
-	
-	// If we want to show loading form
-	if(showLoading) {
-	
-		// When the web console is loading
-		loading(function() {
-			
-			whileLoading(socket);
-		
-		});
-	
-	} else {
-		
-		whileLoading(socket);
-		
-	}
-	
+function webConsole(socket) {
+	whileLoading(socket);
+
 	// Logout button
 	$('.btn.logout').click(function() {
 		Cookies.remove('credentials');
@@ -41,15 +26,9 @@ function webConsole(socket, showLoading) {
 
 
 function whileLoading(socket) {
-	
-	// Hide the login form
-	hideLoginForm();
-	
-	// Prepare web console displaying
 	$('#webconsole').show();
 
 	$("#eventsCanvas").attr("width", $("#eventsChart .wrapper").width());
-
 
 	var ctx = document.getElementById("eventsCanvas").getContext("2d");
 	linkChart = new LinkChart(ctx);
@@ -238,9 +217,11 @@ function updateServerState(active) {
 	// Update toolbar color and buttons states
 	if (active) {
 		$('#toolbar').css('background', '#65A33F');
+		$('#mlink').css('color', '#65A33F');
 		$('.btn.restart').attr("disabled", true);
 	} else {
 		$('#toolbar').css('background', '#D23339');
+		$('#mlink').css('color', '#D23339');
 		$('.btn.restart').attr("disabled", false);
 	}
 

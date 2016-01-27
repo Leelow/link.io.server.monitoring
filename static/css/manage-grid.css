@@ -43,7 +43,7 @@ html, body {
 .container {
     display: flex;
     overflow: hidden;
-    height: 100vh;
+    height: calc(100vh - 66px);
     margin-top: -30px;
     padding-top: 30px;
     position: relative;
