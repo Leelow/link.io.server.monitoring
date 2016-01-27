@@ -173,6 +173,7 @@ process.on('SIGINT', function () {
     if(typeof _db != 'undefined') {
         _db.close();
     }
+    process.exit();
 });
 
 execScript(script_path, script_arguments);

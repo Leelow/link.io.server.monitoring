@@ -2,6 +2,10 @@
     cursor: pointer;
 }
 
+.table td.action {
+    text-align: center;
+}
+
 .alert-wrapper {
     position: absolute;
     top: 120px;
@@ -42,3 +46,4 @@
 .addBloc {
     line-height: 74px;
 }
+

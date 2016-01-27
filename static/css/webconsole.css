@@ -112,8 +112,9 @@ body  {
 	position: relative;
 	min-height: 60px;
 	margin-bottom: 1px;
-	padding-left: 17px;
+	padding-left: 14px;
 	border: 1px solid transparent;
+	font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 .navbar a {
 	text-decoration: none;
@@ -219,7 +220,7 @@ body  {
 	float: left;
 	padding: 19.5px 15px;
 	font-size: 19px;
-	line-height: 21px;
+	line-height: 19px;
 	height: 60px;
 }
 .navbar-brand:hover,
