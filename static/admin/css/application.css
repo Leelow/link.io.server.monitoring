@@ -1,0 +1,44 @@
+.table .glyphicon {
+    cursor: pointer;
+}
+
+.alert-wrapper {
+    position: absolute;
+    top: 120px;
+    z-index: 5;
+    right: 50%;
+}
+
+.alert {
+    position: absolute;
+    width: 400px;
+    margin-left: -200px;
+}
+
+.row .nav-container {
+    display: none;
+}
+
+.row.well h5 {
+    margin-top: 0;
+}
+
+.row.well.search {
+    padding: 10px;
+}
+
+.reset {
+    margin-top: 5px;
+}
+
+.headBloc {
+    margin-top: 0;
+}
+
+.titleBloc {
+    margin-top: 0;
+}
+
+.addBloc {
+    line-height: 74px;
+}

@@ -12,6 +12,8 @@ $(document).ready(function() {
                     var line = $("<tr>");
                     line.append($("<td>").html(user.name));
                     line.append($("<td>").html(user.api_key));
+                    line.append($("<td>").html('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
+                    line.append($("<td>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
                     $("table").append(line);
                 });
@@ -38,6 +40,8 @@ $(document).ready(function() {
                 var line = $("<tr>");
                 line.append($("<td>").html(name));
                 line.append($("<td>").html(apiKey));
+                line.append($("<td>").html('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
+                line.append($("<td>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
                 $("table").append(line);
 
