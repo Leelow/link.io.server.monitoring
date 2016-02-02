@@ -43,7 +43,49 @@
     margin-top: 0;
 }
 
+.titleBloc h1 span.glyphicon-chevron-left {
+    cursor: pointer;
+}
+
 .addBloc {
     line-height: 74px;
 }
 
+.roles {
+    display: none;
+}
+
+#add-role {
+    display: none;
+}
+
+.users {
+    margin-top: 20px;
+}
+
+.rights {
+    margin-top: 20px;
+}
+
+#app .right-param {
+    width: 10em;
+}
+
+
+.glyphicon-refresh-animate {
+    animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+
+    transform-origin: 52% 50%;
+    -webkit-transform-origin: 52% 50%;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}

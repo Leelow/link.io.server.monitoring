@@ -6,6 +6,7 @@ var request = require('request');
 var chartData = require('./lib/chart.data.js');
 var os = require('os-utils');
 var MongoClient = require('mongodb').MongoClient;
+var ObjectId = require('mongodb').ObjectID;
 
 // Necessary to get the configs
 var configurator = require('./lib/configurator.js')();
