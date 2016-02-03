@@ -71,13 +71,33 @@ $(document).ready(function () {
                             if(typeof users != 'undefined' && users != null) {
                                 var mails = [];
                                 users.forEach(function(us) {
-                                    mails.push(us.mail);
+                                    if($.inArray(us.mail, currentUsers) < 0)
+                                        mails.push(us.mail);
                                 });
                                 cb(mails);
                             }
                         }
                     );
+                }, afterSelect: function() {
+                    $(".user-add").removeAttr('disabled').removeClass('disabled');
                 }});
+
+                $(".mail-user").keyup(function() {
+                    socket.emit('getWithLimit',
+                        {
+                            table:'user',
+                            limit: 1,
+                            data: {
+                                mail: $(this).val()
+                            }
+                        }, function(a) {
+                            if(typeof a != 'undefined' && a != null && a.length == 0)
+                                $(".user-add").attr('disabled', 'disabled').addClass('disabled');
+                            else
+                                $(".user-add").removeAttr('disabled').removeClass('disabled');
+                        }
+                    );
+                });
 
                 $(".role-default").change(function() {
                     $(".role-user-container").slideToggle().prev().fadeToggle();
@@ -110,6 +130,9 @@ $(document).ready(function () {
                     if(user != null && user != "" && $.inArray(user, currentUsers) < 0) {
                         currentUsers.push(user);
                         addNewUserLine(user);
+
+                        $(".mail-user").val('');
+                        $(".user-add").attr('disabled', 'disabled').addClass('disabled');
                     }
                 });
 
@@ -367,7 +390,6 @@ function addNewRoleLine(role, index) {
 
 function addNewUserLine(user) {
     $(".mail-user").val("");
-    $(".mail-user").typeahead('destroy');
 
     var line = $("<tr>");
     line.append($("<td>").html(user));

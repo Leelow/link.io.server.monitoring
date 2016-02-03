@@ -5,6 +5,8 @@ var totalUser;
 var currentPage;
 var currentUsers;
 
+var currentApps;
+
 $(document).ready(function () {
     getMonitoringServerUrl(function (url) {
         socket = io.connect(url + "?user=admin");
@@ -36,13 +38,19 @@ $(document).ready(function () {
             });
 
             $("#add-user").click(function() {
+                $(".app-add").attr('disabled', 'disabled').addClass('disabled');
+                currentApps = [];
                 $(".modal-add-user input").val("");
                 $('.user-apirole').val("User");
                 $(".user-app-container").slideUp(0);
 
                 $('.user-apirole').change(function() {
-                    if($(this).val() == 'Developer')
+                    if($(this).val() == 'Developer') {
+                        $('table.apps tr').not('.head').remove();
+                        currentApps = [];
+                        $(".app-name").val('');
                         $(".user-app-container").slideDown();
+                    }
                     else
                         $(".user-app-container").slideUp();
                 });
@@ -50,9 +58,78 @@ $(document).ready(function () {
 
                 $(".modal-add-user").modal('show');
             });
+
+            $(".app-name").typeahead({source: function(query, cb) {
+                socket.emit('getWithLimit',
+                    {
+                        table:'application',
+                        limit: 5,
+                        data: {
+                            name:{'$regex':'.*' + query + '.*'}
+                        }
+                    }, function(apps) {
+                        if(typeof apps != 'undefined' && apps != null) {
+                            var result = [];
+                            apps.forEach(function(ap) {
+                                if($.inArray(ap.name, currentApps) < 0)
+                                    result.push(ap.name);
+                            });
+                            cb(result);
+                        }
+                    }
+                );
+            }, afterSelect: function() {
+                $(".app-add").removeAttr('disabled').removeClass('disabled');
+            }});
+
+            $(".app-name").keyup(function() {
+                socket.emit('getWithLimit',
+                    {
+                        table:'application',
+                        limit: 1,
+                        data: {
+                            name: $(this).val()
+                        }
+                    }, function(a) {
+                        if(typeof a != 'undefined' && a != null && a.length == 0)
+                            $(".app-add").attr('disabled', 'disabled').addClass('disabled');
+                        else
+                            $(".app-add").removeAttr('disabled').removeClass('disabled');
+                    }
+                );
+            });
+
+            $(".app-add").click(function() {
+                var app = $(".app-name").val();
+                if($.inArray(app, currentApps) < 0) {
+                    currentApps.push(app);
+                    addNewAppLine(app);
+
+                    $(".app-name").val('');
+                    $(".app-add").attr('disabled', 'disabled').addClass('disabled');
+                }
+            });
         });
     });
 });
+
+function addNewAppLine(app) {
+    var line = $("<tr>");
+    line.append($("<td>").html(app));
+    line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
+
+    line.find(".glyphicon-remove").click(function() {
+        for (var i=currentApps.length-1; i>=0; i--) {
+            if (currentApps[i] == app) {
+                currentApps.splice(i, 1);
+            }
+        }
+
+        line.remove();
+    });
+
+    $("table.apps").append(line);
+}
 
 function loadUsers() {
     $(".pagination .active").removeClass("active");
