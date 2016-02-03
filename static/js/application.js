@@ -59,6 +59,26 @@ $(document).ready(function () {
                     }, 500);
                 });
 
+                $(".mail-user").typeahead({source: function(query, cb) {
+                    socket.emit('getWithLimit',
+                        {
+                            table:'user',
+                            limit:5,
+                            data: {
+                                mail:{'$regex':'.*' + query + '.*'}
+                            }
+                        }, function(users) {
+                            if(typeof users != 'undefined' && users != null) {
+                                var mails = [];
+                                users.forEach(function(us) {
+                                    mails.push(us.mail);
+                                });
+                                cb(mails);
+                            }
+                        }
+                    );
+                }});
+
                 $(".role-default").change(function() {
                     $(".role-user-container").slideToggle().prev().fadeToggle();
                 });
@@ -140,28 +160,28 @@ $(document).ready(function () {
                                 name: currentApp.name
                             },
                             data: {
-                                '$push': {
-                                    'roles': role
-                                }
-                            }
-                        });
-                        addNewRoleLine(role, roles.length - 1);
+                        '$push': {
+                            'roles': role
+                        }
                     }
-                    else {
-                        currentApp.roles[currentEditRoleIndex] = role;
+                });
+                addNewRoleLine(role, roles.length - 1);
+            }
+            else {
+                currentApp.roles[currentEditRoleIndex] = role;
 
-                        var s = {};
-                        s['roles.' + currentEditRoleIndex] = role;
+                var s = {};
+                s['roles.' + currentEditRoleIndex] = role;
 
-                        socket.emit('updateOne', {
-                            table: 'application',
-                            critera: {
-                                name: currentApp.name
-                            },
-                            data: {
-                                '$set': s
-                            }
-                        });
+                socket.emit('updateOne', {
+                    table: 'application',
+                    critera: {
+                        name: currentApp.name
+                    },
+                    data: {
+                        '$set': s
+                    }
+                });
 
                         var line = $($("table.roles tr").not(".head")[currentEditRoleIndex]);
                         $(line.children()[0]).html(role.name);
@@ -347,6 +367,7 @@ function addNewRoleLine(role, index) {
 
 function addNewUserLine(user) {
     $(".mail-user").val("");
+    $(".mail-user").typeahead('destroy');
 
     var line = $("<tr>");
     line.append($("<td>").html(user));

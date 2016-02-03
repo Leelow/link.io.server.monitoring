@@ -1,0 +1,56 @@
+.table .glyphicon {
+    cursor: pointer;
+}
+
+.table td.action {
+    text-align: center;
+}
+
+.alert-wrapper {
+    position: absolute;
+    top: 120px;
+    z-index: 5;
+    right: 50%;
+}
+
+.alert {
+    position: absolute;
+    width: 400px;
+    margin-left: -200px;
+}
+
+.row .nav-container {
+    display: none;
+}
+
+.row.well h5 {
+    margin-top: 0;
+}
+
+.row.well.search {
+    padding: 10px;
+}
+
+.reset {
+    margin-top: 5px;
+}
+
+.headBloc {
+    margin-top: 0;
+}
+
+.titleBloc {
+    margin-top: 0;
+}
+
+.titleBloc h1 span.glyphicon-chevron-left {
+    cursor: pointer;
+}
+
+.addBloc {
+    line-height: 74px;
+}
+
+.apps {
+    margin-top: 20px;
+}

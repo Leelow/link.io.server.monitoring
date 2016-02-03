@@ -78,19 +78,31 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
             socket.on('insert', function (d) {
                 db.collection(d.table).insertOne(d.data);
             });
-
+            socket.on('count', function (d, ack) {
+                db.collection(d.table).count(function(err, count) {
+                    ack(count);
+                });
+            });
             socket.on('getAll', function (table, ack) {
                 db.collection(table).find().toArray(function (err, items) {
                     ack(items);
                 });
             });
-
+            socket.on('getRange', function (d, ack) {
+                db.collection(d.table).find().skip(d.skip).limit(d.limit).toArray(function (err, items) {
+                    ack(items);
+                });
+            });
+            socket.on('getWithLimit', function (d, ack) {
+                db.collection(d.table).find(d.data).limit(d.limit).toArray(function (err, items) {
+                    ack(items);
+                });
+            });
             socket.on('get', function (d, ack) {
                 db.collection(d.table).find(d.critera).toArray(function (err, items) {
                     ack(items);
                 });
             });
-
             socket.on('updateOne', function (d) {
                 db.collection(d.table).updateOne(d.critera, d.data);
             });
