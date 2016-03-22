@@ -1,5 +1,6 @@
 var socket;
-var nbUserPerPage = 5;
+var nbUserPerPage = 15;
+var maxPageShortcut = 6;
 var totalPage;
 var totalUser;
 var currentPage;
@@ -9,13 +10,14 @@ var currentEditUserId = "";
 var currentApps;
 
 $(document).ready(function () {
+    $(".import").fadeOut(0);
     getMonitoringServerUrl(function (url) {
         socket = io.connect(url + "?user=admin");
         socket.on('connect', function () {
             socket.emit('count', {table: 'user'}, function (c) {
                 totalUser = c;
                 totalPage = Math.ceil(totalUser / nbUserPerPage);
-                for (var i = 0; i < totalPage; i++) {
+                for (var i = 0; i < maxPageShortcut; i++) {
                     var elem = $('<li data-id="' + i + '"><a href="#">' + (i + 1) + '</a></li>');
                     elem.click(function () {
                         currentPage = parseInt($(this).children("a").html()) - 1;
@@ -178,6 +180,44 @@ $(document).ready(function () {
                     }
                 }
             });
+
+            /****** LDAP ********/
+            $("#import-user").click(function () {
+                $(".modal-ldap").modal('show');
+            });
+
+            $(".modal-ldap .ok").click(function () {
+                var server_ip = $(".ldap-ip").val();
+                var server_port = $(".ldap-port").val();
+                var dn = $(".ldap-dn").val();
+
+                if (server_ip != "") {
+                    if (server_ip.indexOf("ldap://") < 0 && server_ip.indexOf("ldaps://") < 0)
+                        server_ip = "ldap://" + server_ip + ":" + server_port;
+                    else
+                        server_ip = server_ip + ":" + server_port;
+
+                    socket.emit('ldap.attributes', server_ip, dn, function (data) {
+                        $(".modal-ldap").modal('hide');
+                        goToImportView(data, function (name, fname, mail, password, max) {
+                            socket.emit('ldap.import', name, fname, mail, password, max,
+                                function (data) {
+                                    if(isNaN(data)) {
+                                        $(".modal-ldap-result .body").html("Error: " + data);
+                                    }
+                                    else {
+                                        $(".modal-ldap-result .body").html("Finish. Users imported: " + data);
+                                    }
+                                    $(".modal-ldap-result").modal('show');
+                                    $(".modal-ldap-result .yes").click(function() {
+                                        location.reload();
+                                    });
+                                }
+                            );
+                        });
+                    });
+                }
+            });
         });
     });
 });
@@ -201,7 +241,18 @@ function addNewAppLine(app) {
 }
 
 function loadUsers() {
-    $(".pagination .active").removeClass("active");
+    var scroll = $("body").scrollTop();
+    var start = Math.max(currentPage - maxPageShortcut/2, 0);
+    var end = Math.min(start + maxPageShortcut, totalPage);
+    $(".pagination li").not('.previous').not('.next').remove();
+    for (var i = start; i < end; i++) {
+        var elem = $('<li data-id="' + i + '"><a href="#">' + (i + 1) + '</a></li>');
+        elem.click(function () {
+            currentPage = parseInt($(this).children("a").html()) - 1;
+            loadUsers();
+        })
+        elem.insertBefore(".next");
+    }
     $(".pagination [data-id='" + currentPage + "']").addClass("active");
     var from = currentPage * nbUserPerPage;
     socket.emit('getRange', {table: 'user', skip: from, limit: nbUserPerPage}, function (users) {
@@ -261,11 +312,66 @@ function loadUsers() {
             $('.users').append(line);
         })
     });
+
+    $("body").scrollTop(scroll);
 }
 
 function getMonitoringServerUrl(func) {
 
     $.getJSON('./infos.json', function (infos) {
         func('http://' + infos.link_io_server_monitoring.host + ':' + infos.link_io_server_monitoring.port);
+    });
+}
+
+function goToImportView(data, cb) {
+    $("table.users").fadeOut();
+    $("#add-user").fadeOut();
+    $("#import-user").fadeOut();
+    $(".pagination").parent().parent().fadeOut();
+    $(".titleBloc h1").fadeOut(function () {
+        $(this).html('<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>' + " LDAP: binding");
+
+        $(this).fadeIn();
+        $(".import").fadeIn();
+
+        $(".import .ldap-binding").children().remove();
+        data.forEach(function (attr) {
+            if (attr.vals.length == 1)
+                $(".import .ldap-binding").append($('<option value="' + attr.type + '">' + attr.type + '</option>'));
+        });
+
+        $(".ldap-go").on('click', function () {
+            if ($(".ldap-password1").val() != $(".ldap-password2").val()) {
+                $(".ldap-password1").parent().parent().addClass("has-error");
+                $(".ldap-password2").parent().parent().addClass("has-error");
+            }
+            else {
+                $(".ldap-go").off('click');
+                $(".ldap-password1").parent().parent().removeClass("has-error");
+                $(".ldap-password2").parent().parent().removeClass("has-error");
+
+                $(this).html("Importing...").addClass("disabled");
+                cb(
+                    $(".ldap-name").val(),
+                    $(".ldap-fname").val(),
+                    $(".ldap-mail").val(),
+                    $(".ldap-password1").val(),
+                    $(".ldap-max").val()
+                );
+            }
+        });
+
+        var that = $(this);
+        $(this).children("span.glyphicon-chevron-left").click(function () {
+            $(".import").fadeOut();
+            that.fadeOut(function () {
+                that.html("Users");
+                $("table.users").fadeIn();
+                $("#add-user").fadeIn();
+                $("#import-user").fadeIn();
+                $(".pagination").parent().parent().fadeIn();
+                that.fadeIn();
+            });
+        });
     });
 }

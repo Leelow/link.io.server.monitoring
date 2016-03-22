@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Link.IO admin</title>
+
+    <link href="./css/bootstrap.css" rel="stylesheet" type="text/css">
+    <link href="./css/site.css" rel="stylesheet" type="text/css">
+    <link href="./css/user.css" rel="stylesheet" type="text/css">
+
+
+    <script src="./js/jquery-1.11.3.min.js" type="text/javascript"></script>
+    <script src="../socket.io/socket.io.js" type="text/javascript"></script>
+    <script src="./js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="./js/objectid.js" type="text/javascript"></script>
+    <script src="./js/typeahead.min.js" type="text/javascript"></script>
+    <script src="./js/db.js" type="text/javascript"></script>
+</head>
+
+<body id="app">
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="index.html">Home</a>
+            <a class="navbar-brand" href="application.html">Applications</a>
+            <a class="navbar-brand" href="user.html">Users</a>
+            <a class="navbar-brand active" href="db.html">Database</a>
+            <a class="navbar-brand" href="monitoring.html">Monitoring</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1 box">
+
+            <div class="row headBloc">
+                <div class="col-md-8 titleBloc">
+                    <h1>Database management</h1>
+                </div>
+                <div class="col-md-4 text-right addBloc">
+                    <button class="btn btn-primary" id="add-dump">Create dump</button>
+                </div>
+            </div>
+
+            <table class="table table-striped table-bordered dumps">
+                <tr class="head">
+                    <th>Name</th>
+                    <th>Date</th>
+                    <th class="text-center">Restore</th>
+                    <th class="text-center">Delete</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-delete-dump">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Delete</h4>
+            </div>
+            <div class="modal-body">
+                <p class="body">Do you want to remove <span class="modal-dump-id">DUMP_ID</span> ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger yes" data-dismiss="modal">Oui</button>
+                <button type="button" class="btn btn-primary no" data-dismiss="modal">Non</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-added-dump">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Dump</h4>
+            </div>
+            <div class="modal-body">
+                <p class="body">Dump <span class="modal-dump-id">DUMP_ID</span> has been saved.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary yes" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-restore-dump">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Dump</h4>
+            </div>
+            <div class="modal-body">
+                <p class="body">Do you realy want to restore dump <span class="modal-dump-id">DUMP_ID</span> ? (it will erase ALL data)</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger yes" data-dismiss="modal">Yes</button>
+                <button type="button" class="btn btn-default no" data-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade modal-restored-dump">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Dump</h4>
+            </div>
+            <div class="modal-body">
+                <p class="body">Dump <span class="modal-dump-id">DUMP_ID</span> has been retored.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary yes" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

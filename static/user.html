@@ -24,6 +24,7 @@
             <a class="navbar-brand" href="index.html">Home</a>
             <a class="navbar-brand" href="application.html">Applications</a>
             <a class="navbar-brand active" href="user.html">Users</a>
+            <a class="navbar-brand" href="db.html">Database</a>
             <a class="navbar-brand" href="monitoring.html">Monitoring</a>
         </div>
     </div>
@@ -38,7 +39,11 @@
                     <h1>Users</h1>
                 </div>
                 <div class="col-md-4 text-right addBloc">
-                    <button class="btn btn-primary" id="add-user"><span class="glyphicon glyphicon-plus"></span> Add</button>
+                    <button class="btn btn-primary" id="add-user"><span class="glyphicon glyphicon-plus"></span> Add
+                    </button>
+                    <button class="btn btn-primary" id="import-user"><span class="glyphicon glyphicon-plus"></span>
+                        Import
+                    </button>
                 </div>
             </div>
 
@@ -68,6 +73,50 @@
                     </ul>
                 </nav>
             </div>
+            <div class="import">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Bind <b>Name</b> to : </label>
+                        <select class="ldap-binding ldap-name form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bind <b>First name</b> to : </label>
+                        <select class="ldap-binding ldap-fname form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bind <b>Mail</b> to : </label>
+                        <select class="ldap-binding ldap-mail form-control"></select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Default password : </label>
+                            <input type="password" class="form-control ldap-password1"/>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Default password (again) : </label>
+                            <input type="password" class="form-control ldap-password2"/>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Import limit (0 = all): </label>
+                            <input type="text" class="form-control ldap-max" value="0"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary ldap-go">Import</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -76,7 +125,8 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Delete</h4>
             </div>
             <div class="modal-body">
@@ -90,11 +140,30 @@
     </div>
 </div>
 
+<div class="modal fade modal-ldap-result">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">LDAP user import</h4>
+            </div>
+            <div class="modal-body">
+                <p class="body"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger yes" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade modal-add-user" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title">Add user</h4>
             </div>
             <div class="modal-body">
@@ -145,9 +214,40 @@
                         </tr>
                     </table>
                 </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary ok">Add</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary ok">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-ldap" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">LDAP settings</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Server name/IP</label>
+                    <input type="text" class="form-control ldap-ip" value="annuaire.insa-rennes.fr"/>
+                </div>
+                <div class="form-group">
+                    <label>Server port</label>
+                    <input type="text" class="form-control ldap-port" value="389"/>
+                </div>
+                <div class="form-group">
+                    <label>DN</label>
+                    <input type="text" class="form-control ldap-dn" value="ou=people,dc=insa-rennes,dc=fr"/>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary ok">Next</button>
+                </div>
             </div>
         </div>
     </div>
