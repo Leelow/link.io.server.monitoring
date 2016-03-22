@@ -43,7 +43,7 @@ $(document).ready(function () {
                     currentUsers = [];
 
                     $(".right-type").children().remove();
-                    rightsTypes.forEach(function(rt) {
+                    rightsTypes.forEach(function (rt) {
                         $(".right-type").append($('<option value="' + rt[0] + '">' + rt[0] + '</option>'));
                     });
 
@@ -59,39 +59,41 @@ $(document).ready(function () {
                     }, 500);
                 });
 
-                $(".mail-user").typeahead({source: function(query, cb) {
-                    socket.emit('getWithLimit',
-                        {
-                            table:'user',
-                            limit:5,
-                            data: {
-                                mail:{'$regex':'.*' + query + '.*'}
+                $(".mail-user").typeahead({
+                    source: function (query, cb) {
+                        socket.emit('getWithLimit',
+                            {
+                                table: 'user',
+                                limit: 5,
+                                data: {
+                                    mail: {'$regex': '.*' + query + '.*'}
+                                }
+                            }, function (users) {
+                                if (typeof users != 'undefined' && users != null) {
+                                    var mails = [];
+                                    users.forEach(function (us) {
+                                        if ($.inArray(us.mail, currentUsers) < 0)
+                                            mails.push(us.mail);
+                                    });
+                                    cb(mails);
+                                }
                             }
-                        }, function(users) {
-                            if(typeof users != 'undefined' && users != null) {
-                                var mails = [];
-                                users.forEach(function(us) {
-                                    if($.inArray(us.mail, currentUsers) < 0)
-                                        mails.push(us.mail);
-                                });
-                                cb(mails);
-                            }
-                        }
-                    );
-                }, afterSelect: function() {
-                    $(".user-add").removeAttr('disabled').removeClass('disabled');
-                }});
+                        );
+                    }, afterSelect: function () {
+                        $(".user-add").removeAttr('disabled').removeClass('disabled');
+                    }
+                });
 
-                $(".mail-user").keyup(function() {
+                $(".mail-user").keyup(function () {
                     socket.emit('getWithLimit',
                         {
-                            table:'user',
+                            table: 'user',
                             limit: 1,
                             data: {
                                 mail: $(this).val()
                             }
-                        }, function(a) {
-                            if(typeof a != 'undefined' && a != null && a.length == 0)
+                        }, function (a) {
+                            if (typeof a != 'undefined' && a != null && a.length == 0)
                                 $(".user-add").attr('disabled', 'disabled').addClass('disabled');
                             else
                                 $(".user-add").removeAttr('disabled').removeClass('disabled');
@@ -99,15 +101,15 @@ $(document).ready(function () {
                     );
                 });
 
-                $(".role-default").change(function() {
+                $(".role-default").change(function () {
                     $(".role-user-container").slideToggle().prev().fadeToggle();
                 });
 
                 $(".right-type").change(function () {
                     $(".right-param").val("");
-                    for(var i = 0; i<rightsTypes.length; i++) {
-                        if($(this).val() == rightsTypes[i][0]) {
-                            if(rightsTypes[i][1])
+                    for (var i = 0; i < rightsTypes.length; i++) {
+                        if ($(this).val() == rightsTypes[i][0]) {
+                            if (rightsTypes[i][1])
                                 $(".right-param").removeAttr("disabled");
                             else
                                 $(".right-param").attr("disabled", "disabled");
@@ -116,18 +118,18 @@ $(document).ready(function () {
                     }
                 });
 
-                $(".right-add").click(function() {
+                $(".right-add").click(function () {
                     var right = $(".right-type").val();
-                    if(right != null) {
+                    if (right != null) {
                         var param = $(".right-param").val();
                         currentRights.push([right, param]);
                         addNewRightLine(right, param);
                     }
                 });
 
-                $(".user-add").click(function() {
+                $(".user-add").click(function () {
                     var user = $(".mail-user").val();
-                    if(user != null && user != "" && $.inArray(user, currentUsers) < 0) {
+                    if (user != null && user != "" && $.inArray(user, currentUsers) < 0) {
                         currentUsers.push(user);
                         addNewUserLine(user);
 
@@ -137,7 +139,7 @@ $(document).ready(function () {
                 });
 
 
-                $(".modal-add-role .ok").click(function() {
+                $(".modal-add-role .ok").click(function () {
                     var role = {
                         name: $(".role-name").val(),
                         is_default: $(".role-default").is(":checked"),
@@ -145,17 +147,17 @@ $(document).ready(function () {
                         rights: currentRights
                     };
 
-                    if(role.is_default)
+                    if (role.is_default)
                         role.users = currentUsers;
 
                     var roles;
-                    if(typeof currentApp.roles != 'undefined')
+                    if (typeof currentApp.roles != 'undefined')
                         roles = currentApp.roles;
                     else
                         roles = [];
 
-                    if(role.is_default) {
-                        roles.forEach(function(r) {
+                    if (role.is_default) {
+                        roles.forEach(function (r) {
                             socket.emit('updateOne', {
                                 table: 'application',
                                 critera: {
@@ -169,12 +171,12 @@ $(document).ready(function () {
                                 }
                             })
                         });
-                        $(".roles tr").not(".head").each(function() {
+                        $(".roles tr").not(".head").each(function () {
                             $($(this).children()[1]).html("No");
                         });
                     }
 
-                    if(currentEditRoleIndex < 0) {
+                    if (currentEditRoleIndex < 0) {
                         roles.push(role);
 
                         socket.emit('updateOne', {
@@ -183,28 +185,28 @@ $(document).ready(function () {
                                 name: currentApp.name
                             },
                             data: {
-                        '$push': {
-                            'roles': role
-                        }
+                                '$push': {
+                                    'roles': role
+                                }
+                            }
+                        });
+                        addNewRoleLine(role, roles.length - 1);
                     }
-                });
-                addNewRoleLine(role, roles.length - 1);
-            }
-            else {
-                currentApp.roles[currentEditRoleIndex] = role;
+                    else {
+                        currentApp.roles[currentEditRoleIndex] = role;
 
-                var s = {};
-                s['roles.' + currentEditRoleIndex] = role;
+                        var s = {};
+                        s['roles.' + currentEditRoleIndex] = role;
 
-                socket.emit('updateOne', {
-                    table: 'application',
-                    critera: {
-                        name: currentApp.name
-                    },
-                    data: {
-                        '$set': s
-                    }
-                });
+                        socket.emit('updateOne', {
+                            table: 'application',
+                            critera: {
+                                name: currentApp.name
+                            },
+                            data: {
+                                '$set': s
+                            }
+                        });
 
                         var line = $($("table.roles tr").not(".head")[currentEditRoleIndex]);
                         $(line.children()[0]).html(role.name);
@@ -221,7 +223,7 @@ $(document).ready(function () {
             var name = $(".modal-add-app input").val();
             if (name != "") {
                 var apiKey = generateAPIKey();
-                var id = new ObjectId();
+                var id = new ObjectId().toString();
                 socket.emit("insert", {
                     table: "application",
                     data: {
@@ -321,7 +323,7 @@ function addNewRoleLine(role, index) {
     line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
     line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
-    line.find(".glyphicon-remove").click(function() {
+    line.find(".glyphicon-remove").click(function () {
         $(".modal-delete-app").modal('show');
         $(".modal-delete-name").html(role.name);
 
@@ -336,7 +338,7 @@ function addNewRoleLine(role, index) {
                 data: {
                     "$pull": {
                         "roles": {
-                            name:role.name
+                            name: role.name
                         }
                     }
                 }
@@ -346,7 +348,7 @@ function addNewRoleLine(role, index) {
     });
 
 
-    line.find(".glyphicon-pencil").click(function() {
+    line.find(".glyphicon-pencil").click(function () {
         currentEditRoleIndex = index;
         $(".modal-add-role").modal('show');
         $(".modal-add-role .app-name").html(currentApp.name);
@@ -358,15 +360,15 @@ function addNewRoleLine(role, index) {
         $(".users").find("tr").not(".head").remove();
 
         $(".right-type").children().remove();
-        rightsTypes.forEach(function(rt) {
+        rightsTypes.forEach(function (rt) {
             $(".right-type").append($('<option value="' + rt[0] + '">' + rt[0] + '</option>'));
         });
 
-        currentRights.forEach(function(r) {
+        currentRights.forEach(function (r) {
             addNewRightLine(r[0], r[1]);
         });
 
-        if(!role.is_default) {
+        if (!role.is_default) {
             currentUsers.forEach(function (u) {
                 addNewUserLine(u);
             });
@@ -396,7 +398,7 @@ function addNewUserLine(user) {
     line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
     line.find(".glyphicon-remove").click(function () {
-        for (var i=currentUsers.length-1; i>=0; i--) {
+        for (var i = currentUsers.length - 1; i >= 0; i--) {
             if (currentUsers[i] == user) {
                 currentUsers.splice(i, 1);
             }
@@ -408,7 +410,7 @@ function addNewUserLine(user) {
 }
 
 function addNewRightLine(right, param) {
-    if(typeof param == 'undefined')
+    if (typeof param == 'undefined')
         param = $(".right-param").val();
 
     $(".right-type option[value='" + right + "']").remove();
@@ -420,7 +422,7 @@ function addNewRightLine(right, param) {
     line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
     line.find(".glyphicon-remove").click(function () {
-        for (var i=currentRights.length-1; i>=0; i--) {
+        for (var i = currentRights.length - 1; i >= 0; i--) {
             if (currentRights[i][0] == right) {
                 currentRights.splice(i, 1);
             }

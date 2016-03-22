@@ -6,7 +6,9 @@ var request = require('request');
 var chartData = require('./lib/chart.data.js');
 var os = require('os-utils');
 var MongoClient = require('mongodb').MongoClient;
-var ObjectId = require('mongodb').ObjectID;
+var express = require('express');
+var app = express();
+var server = require('http').createServer(app);
 
 // Necessary to get the configs
 var configurator = require('./lib/configurator.js')();
@@ -21,20 +23,17 @@ var script_path = configurator.getLinkIOServerScript();
 var script_arguments = configurator.getLinkIOServerArguments();
 var logsUrl = 'http://' + configurator.getLinkIOServerHost() + ':' + configurator.getLinkIOServerPort();
 
-// State signal
-var server = http.createServer(function (req, res) {
-    var done = finalHandler(req, res);
-    serve(req, res, done);
-});
+app.use(express.static(__dirname + '/static'));
 
 // Serve static files
-var serve = serveStatic("./static/");
+server.listen(port);
 
 // Initialize socket.io
 var io = require('socket.io')(server);
 
 // Start server in the good port
 server.listen(port);
+
 console.log('Link.io.server.monitoring (v' + version + ') started on *:' + port);
 
 // Server state
@@ -106,7 +105,6 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
             socket.on('updateOne', function (d) {
                 db.collection(d.table).updateOne(d.critera, d.data);
             });
-
             socket.on('updateMany', function (d) {
                 db.collection(d.table).updateMany(d.critera, d.data);
             });
