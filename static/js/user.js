@@ -1,11 +1,33 @@
 var socket;
-var nbUserPerPage = 15;
+var nbUserPerPage = 13;
 var maxPageShortcut = 6;
 var totalPage;
 var totalUser;
 var currentPage;
 var currentUsers;
 var currentEditUserId = "";
+
+var searchCritera = {
+    name: "",
+    fname: "",
+    mail: "",
+    role: "*",
+    getObject: function() {
+        var o = {};
+        if(this.name != "")
+            o.name = {'$regex': '.*' + this.name + '.*'}
+        if(this.fname != "")
+            o.fname = {'$regex': '.*' + this.fname + '.*'}
+        if(this.mail != "")
+            o.mail = {'$regex': '.*' + this.mail + '.*'}
+        if(this.role != "*") {
+            o['api_role.name'] = this.role;
+        }
+
+        console.log(o);
+        return o;
+    }
+};
 
 var currentApps;
 
@@ -14,31 +36,35 @@ $(document).ready(function () {
     getMonitoringServerUrl(function (url) {
         socket = io.connect(url + "?user=admin");
         socket.on('connect', function () {
-            socket.emit('count', {table: 'user'}, function (c) {
-                totalUser = c;
-                totalPage = Math.ceil(totalUser / nbUserPerPage);
-                for (var i = 0; i < maxPageShortcut; i++) {
-                    var elem = $('<li data-id="' + i + '"><a href="#">' + (i + 1) + '</a></li>');
-                    elem.click(function () {
-                        currentPage = parseInt($(this).children("a").html()) - 1;
-                        loadUsers();
-                    })
-                    elem.insertBefore(".next");
-                }
+            loadUsers();
 
-                $(".next").click(function () {
-                    currentPage = (currentPage + 1) % totalPage;
-                    loadUsers();
-                });
-
-                $(".previous").click(function () {
-                    currentPage = currentPage != 0 ? currentPage - 1 : totalPage - 1;
-                    loadUsers();
-                });
-
-                currentPage = 0;
+            $(".search-name").keyup(function() {
+                searchCritera.name = $(this).val();
                 loadUsers();
             });
+            $(".search-fname").keyup(function() {
+                searchCritera.fname = $(this).val();
+                loadUsers();
+            });
+            $(".search-mail").keyup(function() {
+                searchCritera.mail = $(this).val();
+                loadUsers();
+            });
+            $(".search-role").change(function() {
+                searchCritera.role = $(this).val();
+                loadUsers();
+            });
+            $(".search-reset").click(function() {
+                $(".search-name").val("");
+                $(".search-fname").val("");
+                $(".search-mail").val("");
+                $(".search-role").val("*");
+                searchCritera.name = "";
+                searchCritera.fname = "";
+                searchCritera.mail = "";
+                searchCritera.role = "*";
+                loadUsers();
+            })
 
             $("#add-user").click(function () {
                 $(".modal-add-user .ok").html("Add");
@@ -199,8 +225,8 @@ $(document).ready(function () {
 
                     socket.emit('ldap.attributes', server_ip, dn, function (data) {
                         $(".modal-ldap").modal('hide');
-                        goToImportView(data, function (name, fname, mail, password, max) {
-                            socket.emit('ldap.import', name, fname, mail, password, max,
+                        goToImportView(data, function (name, fname, mail, password, max, filter) {
+                            socket.emit('ldap.import', name, fname, mail, password, max, filter,
                                 function (data) {
                                     if(isNaN(data)) {
                                         $(".modal-ldap-result .body").html("Error: " + data);
@@ -241,6 +267,26 @@ function addNewAppLine(app) {
 }
 
 function loadUsers() {
+    socket.emit('countWithSearch', {table: 'user',data:searchCritera.getObject()}, function (c) {
+        totalUser = c;
+        totalPage = Math.ceil(totalUser / nbUserPerPage);
+
+        $(".next").off('click').on('click', function () {
+            currentPage = (currentPage + 1) % totalPage;
+            loadUsersInPage();
+        });
+
+        $(".previous").off('click').on('click', function () {
+            currentPage = currentPage != 0 ? currentPage - 1 : totalPage - 1;
+            loadUsersInPage();
+        });
+
+        currentPage = 0;
+        loadUsersInPage();
+    });
+}
+
+function loadUsersInPage() {
     var scroll = $("body").scrollTop();
     var start = Math.max(currentPage - maxPageShortcut/2, 0);
     var end = Math.min(start + maxPageShortcut, totalPage);
@@ -249,13 +295,13 @@ function loadUsers() {
         var elem = $('<li data-id="' + i + '"><a href="#">' + (i + 1) + '</a></li>');
         elem.click(function () {
             currentPage = parseInt($(this).children("a").html()) - 1;
-            loadUsers();
+            loadUsersInPage();
         })
         elem.insertBefore(".next");
     }
     $(".pagination [data-id='" + currentPage + "']").addClass("active");
     var from = currentPage * nbUserPerPage;
-    socket.emit('getRange', {table: 'user', skip: from, limit: nbUserPerPage}, function (users) {
+    socket.emit('getRangeWithSearch', {table: 'user', skip: from, limit: nbUserPerPage, data: searchCritera.getObject()}, function (users) {
         currentUsers = users;
         $('.users tr').not(".head").remove();
 
@@ -356,7 +402,8 @@ function goToImportView(data, cb) {
                     $(".ldap-fname").val(),
                     $(".ldap-mail").val(),
                     $(".ldap-password1").val(),
-                    $(".ldap-max").val()
+                    $(".ldap-max").val(),
+                    $(".ldap-filter").val()
                 );
             }
         });

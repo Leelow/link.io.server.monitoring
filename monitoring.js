@@ -85,6 +85,11 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                     ack(count);
                 });
             });
+            socket.on('countWithSearch', function (d, ack) {
+                db.collection(d.table).count(d.data, function(err, count) {
+                    ack(count);
+                });
+            });
             socket.on('getAll', function (table, ack) {
                 db.collection(table).find().toArray(function (err, items) {
                     ack(items);
@@ -92,6 +97,11 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
             });
             socket.on('getRange', function (d, ack) {
                 db.collection(d.table).find().skip(d.skip).limit(d.limit).toArray(function (err, items) {
+                    ack(items);
+                });
+            });
+            socket.on('getRangeWithSearch', function (d, ack) {
+                db.collection(d.table).find(d.data).skip(d.skip).limit(d.limit).toArray(function (err, items) {
                     ack(items);
                 });
             });
@@ -146,9 +156,9 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                     res.on('end', function(result) {});
                 });
             });
-            socket.on('ldap.import', function (name, fname, mail, password, max, callback) {
+            socket.on('ldap.import', function (name, fname, mail, password, max, filter, callback) {
                 var opts = {
-                    filter: '(uid=*)',
+                    filter: filter,
                     scope: 'sub',
                     attributes: [name, fname, mail],
                     sizeLimit: parseInt(max)

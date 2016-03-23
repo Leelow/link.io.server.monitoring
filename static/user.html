@@ -47,6 +47,30 @@
                 </div>
             </div>
 
+            <div class="well row search">
+                <h5 class="text-center">Recherche</h5>
+                <div class="col-md-2 col-md-offset-2">
+                    <input type="text" placeholder="Name" class="form-control search-name">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" placeholder="First name" class="form-control search-fname">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" placeholder="Mail" class="form-control search-mail">
+                </div>
+                <div class="col-md-2">
+                    <select class="ldap-binding search-role form-control">
+                        <option value="*">All</option>
+                        <option value="User">User</option>
+                        <option value="Developer">Developer</option>
+                        <option value="Administrator">Administrator</option>
+                    </select>
+                </div>
+                <div class="col-md-1 text-center">
+                    <button class="btn btn-default btn-sm search-reset">Reset</button>
+                </div>
+            </div>
+
             <table class="table table-striped table-bordered users">
                 <tr class="head">
                     <th>Name</th>
@@ -108,6 +132,13 @@
                         <div class="form-group">
                             <label>Import limit (0 = all): </label>
                             <input type="text" class="form-control ldap-max" value="0"/>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label>Filter: </label>
+                            <input type="text" class="form-control ldap-filter" value="(uid=*)"/>
                         </div>
                     </div>
                 </div>
