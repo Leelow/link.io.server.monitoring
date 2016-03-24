@@ -76,6 +76,17 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                 io.to('auth-room').emit('monitoring', chartData.appendData(event));
             });
         }
+        else if (socket.handshake.query.user == 'admin_login') {  //monitoring <-> login for admin web page
+            socket.on('canConnect', function(mail, password, cb) {
+                db.collection('user').find({mail: mail, password: password}, function(err, cursor) {
+                    cursor.toArray(function(err, users) {
+                        cb(users);
+                    })
+                });
+
+                //cb(user);
+            })
+        }
         else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page
             socket.on('insert', function (d) {
                 db.collection(d.table).insertOne(d.data);
@@ -175,9 +186,9 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                                 mail: entry.object[mail]
                             }, {
                                 $set: {
-                                    name: entry.object[name],
-                                    fname: entry.object[fname],
-                                    mail: entry.object[mail],
+                                    name: entry.object[name].toUpperCase(),
+                                    fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1),
+                                    mail: entry.object[mail].toLowerCase(),
                                     password: password,
                                     api_role: {
                                         name: "User",

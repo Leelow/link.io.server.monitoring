@@ -5,7 +5,7 @@ var totalPage;
 var totalUser;
 var currentPage;
 var currentUsers;
-var currentEditUserId = "";
+var currentEditUserMail = "";
 
 var searchCritera = {
     name: "",
@@ -24,7 +24,6 @@ var searchCritera = {
             o['api_role.name'] = this.role;
         }
 
-        console.log(o);
         return o;
     }
 };
@@ -68,7 +67,7 @@ $(document).ready(function () {
 
             $("#add-user").click(function () {
                 $(".modal-add-user .ok").html("Add");
-                currentEditUserId = "";
+                currentEditUserMail = "";
                 $(".app-add").attr('disabled', 'disabled').addClass('disabled');
                 currentApps = [];
                 $(".modal-add-user input").val("");
@@ -79,9 +78,9 @@ $(document).ready(function () {
             });
 
             $('.user-apirole').change(function () {
+                currentApps = [];
                 if ($(this).val() == 'Developer') {
                     $('table.apps tr').not('.head').remove();
-                    currentApps = [];
                     $(".app-name").val('');
                     $(".user-app-container").slideDown();
                 }
@@ -163,7 +162,7 @@ $(document).ready(function () {
                 else if (role == "Developer" && currentApps.length == 0)
                     $(".modal-add-user .app-name").parent().addClass("has-error");
                 else {
-                    if (currentEditUserId == "") {
+                    if (currentEditUserMail == "") {
                         var id = new ObjectId().toString();
 
                         socket.emit("insert", {
@@ -187,7 +186,7 @@ $(document).ready(function () {
                         socket.emit('updateOne', {
                             table: 'user',
                             critera: {
-                                _id: currentEditUserId
+                                mail: currentEditUserMail
                             },
                             data: {
                                 $set: {
@@ -315,7 +314,7 @@ function loadUsersInPage() {
             line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
 
             line.find(".glyphicon-pencil").click(function () {
-                currentEditUserId = u._id;
+                currentEditUserMail = u.mail;
                 $(".modal-add-user .ok").html("Edit");
                 $('table.apps tr').not('.head').remove();
                 $(".app-add").attr('disabled', 'disabled').addClass('disabled');
