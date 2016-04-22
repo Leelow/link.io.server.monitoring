@@ -1,5 +1,8 @@
 var socket;
 
+if(user.api_role.name == "Developer")
+    window.location = "home.html";
+
 $(document).ready(function () {
     getMonitoringServerUrl(function (url) {
         socket = io.connect(url + "?user=admin");

@@ -31,6 +31,8 @@ var searchCritera = {
 var currentApps;
 
 $(document).ready(function () {
+    if(user.api_role.name == "Developer")
+        $(".user-apirole").attr("disabled", "disabled");
     $(".import").fadeOut(0);
     getMonitoringServerUrl(function (url) {
         socket = io.connect(url + "?user=admin");
@@ -347,7 +349,7 @@ function loadUsersInPage() {
                     socket.emit("deleteOne", {
                         table: "user",
                         critera: {
-                            _id: u._id
+                            mail: u.mail
                         }
                     });
                     line.remove();

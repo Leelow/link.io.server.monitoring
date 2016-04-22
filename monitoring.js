@@ -83,8 +83,6 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                         cb(users);
                     })
                 });
-
-                //cb(user);
             })
         }
         else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page

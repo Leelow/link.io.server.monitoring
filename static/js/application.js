@@ -14,6 +14,9 @@ var rightsTypes = [
 ];
 
 $(document).ready(function () {
+    if(user.api_role.name == "Developer")
+        $(".addBloc").remove();
+
     getMonitoringServerUrl(function (url) {
 
         socket = io.connect(url + "?user=admin");
@@ -21,7 +24,14 @@ $(document).ready(function () {
             socket.emit('getAll', 'application', function (res) {
                 apps = res;
                 res.forEach(function (app) {
-                    addNewApplicationLine(app);
+                    if(user.api_role.name == "Administrator")
+                        addNewApplicationLine(app);
+                    else {
+                        user.api_role.applications.forEach(function(a) {
+                            if(a == app.name)
+                                addNewApplicationLine(app);
+                        });
+                    }
                 });
 
                 $("#add-app").removeClass("btn-warning")
