@@ -1,0 +1,11 @@
+.log {
+    width: 100%;
+    min-height: 400px;
+    background-color: black;
+    overflow-wrap: break-word;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: "Courier New", Courier, monospace;
+    padding: 0 5px;
+}
