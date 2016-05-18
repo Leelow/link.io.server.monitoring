@@ -4,7 +4,7 @@ node_modules/
 *.iml
 infos.json
 settings.json
-
+install/link.io
 
 #################
 ## Eclipse

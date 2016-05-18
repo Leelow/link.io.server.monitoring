@@ -2,8 +2,8 @@
   "link_io_server_monitoring": {
     "host": "localhost",
     "port": 8081,
-    "admin_account_mail": "admin@link.io",
-    "admin_account_password": "admin"
+    "adm_account_mail": "admin@link.io",
+    "adm_account_password": "admin"
   },
   "link_io_server": {
     "host": "localhost",
