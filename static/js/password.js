@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	$(".alert.alert-success").hide();
+	$(".alert.alert-danger").hide();
     var token = getQueryVariable("token");
 
     if(token != "") {
@@ -6,20 +8,43 @@ $(document).ready(function () {
             socket = io.connect(url + "?user=admin_password");
             socket.on('connect', function () {
                 socket.emit('validToken', token, function (mail) {
-                    if(typeof mail == 'undefined')
-                        $(".changePassword").hide();
+                    if(typeof mail == 'undefined') {
+						$(".alert.alert-danger").show();
+						$(".changePassword").hide();
+					}
                     else {
-                        $(".alert.alert-danger").hide();
+						$(".alert.alert-danger").hide();
                         $(".mail").html(mail);
 
+                        $(".go").click(function() {
+							var p1 = $(".password1");
+							var p2 = $(".password2");
 
+							if(p1.val() == "" || p1.val() != p2.val()) {
+								p1.parent().addClass("has-error");
+								p2.parent().addClass("has-error");
+							}
+							else {
+								p1.parent().removeClass("has-error");
+								p2.parent().removeClass("has-error");
+
+								socket.emit('changePassword', token, mail, p1.val(), function (ok) {
+									if(ok) {
+										$(".changePassword").hide();
+										$(".alert.alert-success").show();
+									}
+								})
+							}
+						})
                     }
                 });
             });
         });
     }
-    else
-        $(".changePassword").hide();
+    else {
+		$(".alert.alert-danger").show();
+		$(".changePassword").hide();
+	}
 });
 
 function getMonitoringServerUrl(func) {

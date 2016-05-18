@@ -120,6 +120,22 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                         cb();
                 });
             })
+            socket.on('changePassword', function(token, mail, password, cb) {
+                db.collection('user').find({token:token, mail:mail}).toArray(function(err, users) {
+                    if(users.length == 1) {
+						db.collection('user').updateOne({_id: users[0]._id}, {
+							$set: {
+								password: passwordHash.generate(password),
+								token: generateToken()
+							}
+						}, function() {
+							cb(true);
+						});
+					}
+                    else
+                        cb(false);
+                });
+            })
         }
         else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page
             socket.on('insert', function (d) {
