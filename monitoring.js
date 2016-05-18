@@ -110,10 +110,22 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                 });
             })
         }
+        else if (socket.handshake.query.user == 'admin_password') {  //monitoring <-> change password web page
+            socket.on('validToken', function(token, cb) {
+                var users = [];
+                db.collection('user').find({token:token}).toArray(function(err, users) {
+                    if(users.length == 1)
+                        cb(users[0].mail);
+                    else
+                        cb();
+                });
+            })
+        }
         else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page
             socket.on('insert', function (d) {
                 if(typeof d.data.password != 'undefined')
                     d.data.password = passwordHash.generate(d.data.password);
+                d.data.token = generateToken();
                 db.collection(d.table).insertOne(d.data);
             });
             socket.on('count', function (d, ack) {
@@ -219,6 +231,7 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                                     fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1),
                                     mail: entry.object[mail].toLowerCase(),
                                     password: hasedPassword,
+                                    token: generateToken(),
                                     api_role: {
                                         name: "User",
                                         applications: []
@@ -359,3 +372,7 @@ process.on('SIGINT', function () {
 });
 
 execScript(script_path, script_arguments);
+
+function generateToken() {
+    return Math.random().toString(36).substring(2, 18).toUpperCase();
+}
