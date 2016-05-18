@@ -12,6 +12,7 @@ var server = require('http').createServer(app);
 var ldap = require('ldapjs');
 var fs = require('fs');
 var rmdir = require('rimraf');
+var passwordHash = require('password-hash');
 
 // Necessary to get the configs
 var configurator = require('./lib/configurator.js')();
@@ -52,15 +53,18 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
     //Add admin account if no accounts
     db.collection("user").count(function (err, count) {
         if(count == 0) {
+            process.stdout.write("Insert admin account...");
             db.collection("user").insertOne({
                 "mail" : configurator.getAdminMail(),
                 "name" : "ADMIN",
                 "fname" : "Admin",
-                "password" : configurator.getAdminPassword(),
+                "password" : passwordHash.generate(configurator.getAdminPassword()),
                 "api_role" : {
                     "name" : "Administrator",
                     "applications" : []
                 }
+            }, function() {
+                process.stdout.write(" Done\n");
             });
         }
     });
@@ -94,15 +98,22 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
         }
         else if (socket.handshake.query.user == 'admin_login') {  //monitoring <-> login for admin web page
             socket.on('canConnect', function(mail, password, cb) {
-                db.collection('user').find({mail: mail, password: password}, function(err, cursor) {
-                    cursor.toArray(function(err, users) {
+                var users = [];
+                db.collection('user').find({mail:mail}).each(function(err, user) {
+                    if(user != null) {
+                        if (passwordHash.verify(password, user.password)) {
+                            users.push(user);
+                        }
+                    } else {
                         cb(users);
-                    })
+                    }
                 });
             })
         }
         else if (socket.handshake.query.user == 'admin') {  //monitoring <-> admin web page
             socket.on('insert', function (d) {
+                if(typeof d.data.password != 'undefined')
+                    d.data.password = passwordHash.generate(d.data.password);
                 db.collection(d.table).insertOne(d.data);
             });
             socket.on('count', function (d, ack) {
@@ -141,6 +152,8 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                 });
             });
             socket.on('updateOne', function (d) {
+                if(typeof d.data.password != 'undefined')
+                    d.data.$set.password = passwordHash.generate(d.data.$set.password);
                 db.collection(d.table).updateOne(d.critera, d.data);
             });
             socket.on('updateMany', function (d) {
@@ -189,6 +202,8 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                     sizeLimit: parseInt(max)
                 };
 
+                var hasedPassword = passwordHash.generate(password);
+
                 client.search(dn, opts, function(err, res) {
                     if(err)
                         throw err;
@@ -203,7 +218,7 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                                     name: entry.object[name].toUpperCase(),
                                     fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1),
                                     mail: entry.object[mail].toLowerCase(),
-                                    password: password,
+                                    password: hasedPassword,
                                     api_role: {
                                         name: "User",
                                         applications: []

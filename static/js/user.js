@@ -76,6 +76,9 @@ $(document).ready(function () {
                 $('.user-apirole').val("User");
                 $(".user-app-container").slideUp(0);
 
+                $(".modal-add-user .user-password1").removeAttr("disabled");
+                $(".modal-add-user .user-password2").removeAttr("disabled");
+
                 $(".modal-add-user").modal('show');
             });
 
@@ -161,6 +164,10 @@ $(document).ready(function () {
                     $(".modal-add-user .user-password1").parent().addClass("has-error");
                     $(".modal-add-user .user-password2").parent().addClass("has-error");
                 }
+                else if (p1 == "" && currentEditUserMail == "") {
+                    $(".modal-add-user .user-password1").parent().addClass("has-error");
+                    $(".modal-add-user .user-password2").parent().addClass("has-error");
+                }
                 else if (role == "Developer" && currentApps.length == 0)
                     $(".modal-add-user .app-name").parent().addClass("has-error");
                 else {
@@ -195,7 +202,6 @@ $(document).ready(function () {
                                     name: name,
                                     fname: fname,
                                     mail: mail,
-                                    password: p1,
                                     api_role: {
                                         name: role,
                                         applications: currentApps
@@ -331,8 +337,8 @@ function loadUsersInPage() {
                 $(".modal-add-user .user-name").val(u.name);
                 $(".modal-add-user .user-fname").val(u.fname);
                 $(".modal-add-user .user-mail").val(u.mail);
-                $(".modal-add-user .user-password1").val(u.password);
-                $(".modal-add-user .user-password2").val(u.password);
+                $(".modal-add-user .user-password1").attr("disabled", "disabled");
+                $(".modal-add-user .user-password2").attr("disabled", "disabled");
                 $('.user-apirole').val(u.api_role.name);
                 if (u.api_role.name == "Developer")
                     $(".user-app-container").slideDown(0);

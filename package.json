@@ -10,6 +10,7 @@
     "ldapjs": "^1.0.0",
     "mongodb": "^2.1.4",
     "os-utils": "0.0.14",
+    "password-hash": "^1.2.2",
     "request": "^2.65.0",
     "rimraf": "^2.5.2",
     "serve-static": "^1.10.0",
