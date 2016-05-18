@@ -110,7 +110,7 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
                 });
             });
             socket.on('getRangeWithSearch', function (d, ack) {
-                db.collection(d.table).find(d.data).skip(d.skip).limit(d.limit).toArray(function (err, items) {
+                db.collection(d.table).find(d.data).sort(typeof d.sort != 'undefined' ? d.sort : {}).skip(d.skip).limit(d.limit).toArray(function (err, items) {
                     ack(items);
                 });
             });

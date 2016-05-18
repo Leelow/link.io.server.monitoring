@@ -302,7 +302,15 @@ function loadUsersInPage() {
     }
     $(".pagination [data-id='" + currentPage + "']").addClass("active");
     var from = currentPage * nbUserPerPage;
-    socket.emit('getRangeWithSearch', {table: 'user', skip: from, limit: nbUserPerPage, data: searchCritera.getObject()}, function (users) {
+    socket.emit('getRangeWithSearch', {
+            table: 'user',
+            skip: from,
+            limit: nbUserPerPage,
+            data: searchCritera.getObject(),
+            sort: {
+                name: 1
+            }
+    }, function (users) {
         currentUsers = users;
         $('.users tr').not(".head").remove();
 
