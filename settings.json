@@ -1,19 +1,13 @@
 {
   "link_io_server_monitoring": {
-    "login": "1",
-    "password": {
-      "value": "insV9PZgOX2cRabbb828f8ba45ddaf33f799c1b49d234fc4fd764",
-      "isHashed": true
-    },
     "host": "localhost",
-    "port": 8081
+    "port": 8081,
+    "admin_account_mail": "admin@link.io",
+    "admin_account_password": "admin"
   },
   "link_io_server": {
-    "script": "../link.io.server/server.js",
-    "arguments": [
-      "monitoring=8081"
-    ],
     "host": "localhost",
-    "port": 8080
+    "port": 8080,
+    "script": "../link.io.server/server.js"
   }
 }

@@ -49,6 +49,22 @@ var _db = undefined;
 MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
     _db = db;
 
+    //Add admin account if no accounts
+    db.collection("user").count(function (err, count) {
+        if(count == 0) {
+            db.collection("user").insertOne({
+                "mail" : configurator.getAdminMail(),
+                "name" : "ADMIN",
+                "fname" : "Admin",
+                "password" : configurator.getAdminPassword(),
+                "api_role" : {
+                    "name" : "Administrator",
+                    "applications" : []
+                }
+            });
+        }
+    });
+
     // On user connection
     io.on('connection', function (socket) {
         var firstAuth = true;
