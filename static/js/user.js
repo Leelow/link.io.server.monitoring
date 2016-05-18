@@ -15,11 +15,11 @@ var searchCritera = {
     getObject: function() {
         var o = {};
         if(this.name != "")
-            o.name = {'$regex': '.*' + this.name + '.*'}
+            o.name = {'$regex': '.*' + this.name + '.*', '$options': 'i'}
         if(this.fname != "")
-            o.fname = {'$regex': '.*' + this.fname + '.*'}
+            o.fname = {'$regex': '.*' + this.fname + '.*', '$options': 'i'}
         if(this.mail != "")
-            o.mail = {'$regex': '.*' + this.mail + '.*'}
+            o.mail = {'$regex': '.*' + this.mail + '.*', '$options': 'i'}
         if(this.role != "*") {
             o['api_role.name'] = this.role;
         }
