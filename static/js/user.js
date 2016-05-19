@@ -389,6 +389,7 @@ function goToImportView(data, cb) {
     $("#add-user").fadeOut();
     $("#import-user").fadeOut();
     $(".pagination").parent().parent().fadeOut();
+    $(".users-preview").parent().parent().hide();
     $(".titleBloc h1").fadeOut(function () {
         $(this).html('<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>' + " LDAP: binding");
 
@@ -400,6 +401,10 @@ function goToImportView(data, cb) {
             if (attr.vals.length == 1)
                 $(".import .ldap-binding").append($('<option value="' + attr.type + '">' + attr.type + '</option>'));
         });
+
+		$(".ldap-preview").on('click', function() {
+
+		});
 
         $(".ldap-go").on('click', function () {
             if ($(".ldap-password1").val() != $(".ldap-password2").val()) {

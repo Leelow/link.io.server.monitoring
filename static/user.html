@@ -85,9 +85,9 @@
 
             <table class="table table-striped table-bordered users">
                 <tr class="head">
-                    <th>Name</th>
+                    <th>Last name</th>
                     <th>First name</th>
-                    <th>Mail</th>
+                    <th>Email</th>
                     <th>API role</th>
                     <th class="text-center">Edit</th>
                     <th class="text-center">Delete</th>
@@ -112,17 +112,17 @@
             <div class="import">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label>Bind <b>Name</b> to : </label>
+                        <label>Bind <b>last name</b> to : </label>
                         <select class="ldap-binding ldap-name form-control"></select>
                     </div>
 
                     <div class="form-group">
-                        <label>Bind <b>First name</b> to : </label>
+                        <label>Bind <b>first name</b> to : </label>
                         <select class="ldap-binding ldap-fname form-control"></select>
                     </div>
 
                     <div class="form-group">
-                        <label>Bind <b>Mail</b> to : </label>
+                        <label>Bind <b>email</b> to : </label>
                         <select class="ldap-binding ldap-mail form-control"></select>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label>Default password (again) : </label>
+                            <label>Default password (confirm) : </label>
                             <input type="password" class="form-control ldap-password2"/>
                         </div>
                     </div>
@@ -156,7 +156,20 @@
                 </div>
                 <div class="col-md-12">
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-primary ldap-go">Import</button>
+                        <button type="button" class="btn btn-primary ldap-preview">Preview with these settings</button>
+                        <button type="button" class="btn btn-danger ldap-go">Import</button>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="modal-footer">
+                        <table class="table table-striped table-bordered users-preview">
+                            <tr class="head">
+                                <th>Last name</th>
+                                <th>First name</th>
+                                <th>Email</th>
+                                <th>API role</th>
+                            </tr>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -211,7 +224,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Name</label>
+                    <label>Last name</label>
                     <input type="text" class="form-control user-name"/>
                 </div>
                 <div class="form-group">
@@ -219,7 +232,7 @@
                     <input type="text" class="form-control user-fname"/>
                 </div>
                 <div class="form-group">
-                    <label>Mail</label>
+                    <label>Email</label>
                     <input type="email" class="form-control user-mail"/>
                 </div>
                 <div class="form-group">
