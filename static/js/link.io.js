@@ -31,6 +31,10 @@ __LinkIO.prototype.connect = function(serverUrl, mail, password, api_key, callba
         callback(currentUser);
     })
 
+    this.socket.on('error', function(err) {
+        console.log(err);
+    })
+
     this.socket.on("event", function(e) {
         if(typeof e.type != 'undefined' && typeof that.eventHandlers[e.type] != 'undefined') {
             that.eventHandlers[e.type](e.data);
