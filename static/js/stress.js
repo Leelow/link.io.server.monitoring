@@ -7,7 +7,7 @@ var logContainer;
 $(document).ready(function() {
 	logContainer = $(".log");
 	$(".go").click(function() {
-		linkIO.connect("http://localhost:8080", "bastien.baret@insa-rennes.fr", "123", "YvSGLCu54NQmXOl80lIJ", function() {
+		linkIO.connect("http://localhost:8080", "bastien.baret@insa-rennes.fr", "123", "JPTsyyDfN7GDnfk6zNpI", function(user) {
 			log("connected");
 			linkIO.joinRoom("stress", function() {
 				log("joined room 'stress'");
@@ -19,11 +19,11 @@ $(document).ready(function() {
 					if(nbReceived == 10000) {
 						log("Done. Total time: " + (new Date().getTime() - from.getTime()) + "ms");
 					}
-				})
+				});
 
 				var from = new Date();
 				for(var i = 0; i<10000; i++)
-					linkIO.emit("stress", 42, true);
+					linkIO.send("stress", 42, true);
 			})
 		});
 	});

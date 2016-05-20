@@ -1,90 +1,185 @@
 /**
  * Link.IO Web API
  */
-socket = {};
 var linkIO = new __LinkIO();
+
 function __LinkIO() {
-	this.socket = undefined;
-	this.eventHandlers = {};
-	this.currentRoom = "";
-	this.joinRoomHandler = function() {};
+    this.socket = undefined;
+    this.eventHandlers = {};
+    this.currentRoom = "";
+    this.userJoinHandler = function() {};
+    this.userLeftHandler = function() {};
+    this.usersInRoom = [];
+    this.currentUser = {};
+    this.connectedHandler = function() {};
 }
 
-__LinkIO.prototype.connect = function(serverUrl, mail, password, api_key, cb) {
-	this.socket = io(serverUrl + "?mail=" + encodeURIComponent(mail) + "&password=" + encodeURIComponent(password) + "&api_key=" + encodeURIComponent(api_key));
-	this.socket.on('connect', function() {
-		cb();
-	});
-	socket = this.socket;
-	var that = this;
+/**
+ * Start connection to the server
+ * @param serverUrl
+ * @param mail
+ * @param password
+ * @param api_key
+ * @param callback Called when you are successfully connected. Current user is passed as argument.
+ */
+__LinkIO.prototype.connect = function(serverUrl, mail, password, api_key, callback) {
+    this.socket = io(serverUrl + "?mail=" + encodeURIComponent(mail) + "&password=" + encodeURIComponent(password) + "&api_key=" + encodeURIComponent(api_key));
+    var that = this;
 
-	bindEvent(this);
+    this.socket.on('info', function(currentUser) {
+        that.currentUser = currentUser;
+        callback(currentUser);
+    })
 
-	socket.on('reconnect', function() {
-		if(that.currentRoom != "") {
-			that.joinRoom(that.currentRoom != 'crash' ? that.currentRoom : 'abcd', that.joinRoomHandler);
-		}
-	})
+    this.socket.on("event", function(e) {
+        if(typeof e.type != 'undefined' && typeof that.eventHandlers[e.type] != 'undefined') {
+            that.eventHandlers[e.type](e.data);
+        }
+    });
+
+    this.socket.on('reconnect', function() {
+        if(that.currentRoom != "") {
+            that.joinRoom(that.currentRoom);
+        }
+    });
+
+    this.socket.on("users", function(users) {
+        if(users.length > that.usersInRoom.length) {
+            users.forEach(function(user1) {
+                var found = false;
+                that.usersInRoom.forEach(function(user2) {
+                    if(user1.id == user2.id)
+                        found = true;
+                });
+                if(!found)
+                    that.userJoinHandler(user1);
+            });
+        }
+        else {
+            that.usersInRoom.forEach(function(user1) {
+                var found = false;
+                users.forEach(function(user2) {
+                    if(user1.id == user2.id)
+                        found = true;
+                });
+
+                if(!found)
+                    that.userLeftHandler(user1);
+            });
+        }
+
+        that.usersInRoom = users;
+    });
 }
 
-function bindEvent(linkIO) {
-	linkIO.socket.on("event", function(e) {
-		if(typeof e.type != 'undefined' && typeof linkIO.eventHandlers[e.type] != 'undefined') {
-			linkIO.eventHandlers[e.type](e.data);
-		}
-	});
-}
-
+/**
+ * Enter in a new room
+ * @param cb
+ */
 __LinkIO.prototype.createRoom = function(cb) {
-	this.__checkInit();
-	var that = this;
-	this.socket.emit("createRoom", "", function(id) {
-		that.currentRoom = id;
-		cb();
-	});
+    this.__checkInit();
+    var that = this;
+    this.socket.emit("createRoom", "", function(id) {
+        that.currentRoom = id;
+        cb();
+    });
 }
 
+/**
+ * Join an existing room. If it doesn't exist, create a new one with the given ID
+ * @param id
+ * @param cb
+ */
 __LinkIO.prototype.joinRoom = function(id, cb) {
-	this.__checkInit();
-	this.currentRoom = id;
-	this.joinRoomHandler = cb;
-	this.socket.emit("joinRoom", id, cb);
+    this.__checkInit();
+    this.currentRoom = id;
+    var that = this;
+    this.socket.emit("joinRoom", id, function(id, users) {
+        that.usersInRoom = users;
+        cb(id, users);
+    });
 }
 
-__LinkIO.prototype.onUsersInRoomChange = function(callback) {
-	this.__checkInit();
-	this.socket.on("users", callback);
+
+/**
+ * Called when a new user join the current room.
+ * @param callback
+ */
+__LinkIO.prototype.onUserJoinRoom = function(callback) {
+    this.userJoinHandler = callback;
 }
 
+/**
+ * Called when a user leave the current room.
+ * @param callback
+ */
+__LinkIO.prototype.onUserLeftRoom = function(callback) {
+    this.userLeftHandler = callback;
+
+}
+
+/**
+ * Add an event handler
+ * @param name
+ * @param callback
+ */
 __LinkIO.prototype.on = function(name, callback) {
-	this.eventHandlers[name] = callback;
+    this.eventHandlers[name] = callback;
 }
 
+/**
+ * Remove an event handler
+ * @param name
+ * @param callback
+ */
 __LinkIO.prototype.off = function(name) {
-	return delete this.eventHandlers["_" + name];
+    return delete this.eventHandlers[name];
 }
 
-__LinkIO.prototype.emit = function(name, data, receiveAlso) {
-	this.__checkInit();
-	if(typeof receiveAlso == 'undefined')
-		receiveAlso = false;
+/**
+ * Send an event
+ * @param name
+ * @param data
+ * @param receiveAlso
+ */
+__LinkIO.prototype.send = function(name, data, receiveAlso) {
+    this.__checkInit();
+    if(typeof receiveAlso == 'undefined')
+        receiveAlso = false;
 
-	var ev = {};
-	ev.data = data;
-	ev.type = name;
-	ev.me = receiveAlso;
+    var ev = {};
+    ev.data = data;
+    ev.type = name;
+    ev.me = receiveAlso;
 
-	this.socket.emit("event", ev);
+    this.socket.emit("event", ev);
+}
+
+/**
+ * Send an event to specific users
+ * @param name
+ * @param data
+ * @param idList
+ */
+__LinkIO.prototype.sendToList = function(name, data, idList) {
+    this.__checkInit();
+
+    var ev = {};
+    ev.data = data;
+    ev.type = name;
+    ev.idList = idList;
+
+    this.socket.emit("eventToList", ev);
 }
 
 __LinkIO.prototype.getLatency = function(callback) {
-	var before = new Date();
-	this.socket.emit("ping", function() {
-		callback(new Date() - before);
-	});
+    var before = new Date();
+    this.socket.emit("ping", function() {
+        callback(new Date() - before);
+    });
 }
 
 __LinkIO.prototype.__checkInit = function() {
-	if(typeof this.socket == 'undefined')
-		throw new Error("LinkIO: call to 'connect' before.");
+    if(typeof this.socket == 'undefined')
+        throw new Error("LinkIO: call to 'connect' before.");
 }
