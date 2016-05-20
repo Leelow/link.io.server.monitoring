@@ -32,7 +32,7 @@ __LinkIO.prototype.connect = function(serverUrl, mail, password, api_key, callba
     })
 
     this.socket.on('error', function(err) {
-        console.log(err);
+        throw new Error(err);
     })
 
     this.socket.on("event", function(e) {
