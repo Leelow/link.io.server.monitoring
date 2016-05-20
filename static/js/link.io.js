@@ -122,6 +122,15 @@ __LinkIO.prototype.onUserLeftRoom = function(callback) {
 
 }
 
+
+/**
+ * Get all users in current room
+ * @param callback
+ */
+__LinkIO.prototype.getUsersInRoom = function(callback) {
+    callback(this.usersInRoom);
+}
+
 /**
  * Add an event handler
  * @param name
