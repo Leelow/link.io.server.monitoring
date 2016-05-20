@@ -257,17 +257,17 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
 									throw err;
 
 								res.on('searchEntry', function (entry) {
-									var mail = entry.object[mail];
-									if(typeof mail == 'undefined' || mail == "null" || mail == "NULL" || mail == "") {
-										mail = entry.object['uid'].toLowerCase() + '@' + mailDomain;
+									var email = entry.object[mail];
+									if(typeof email == 'undefined' || email == "null" || email == "NULL" || email == "") {
+                                        email = entry.object['uid'].toLowerCase() + '@' + mailDomain;
 									}
 									else
-										mail = mail.toLowerCase();
+                                        email = email.toLowerCase();
 
                                     tabUsers.push({
 										name: entry.object[name].toUpperCase(),
 										fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1).toLowerCase(),
-										mail: mail,
+										mail: email,
                                         api_role: {
                                             name: "User"
                                         }
@@ -320,20 +320,20 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
 								res.on('searchEntry', function (entry) {
 									nb++;
 									setTimeout(function () {
-										var mail = entry.object[mail];
-										if(typeof mail == 'undefined' || mail == "null" || mail == "NULL" || mail == "") {
-											mail = entry.object['uid'].toLowerCase() + '@' + mailDomain;
+										var email = entry.object[mail];
+                                        if(typeof email == 'undefined' || email == "null" || email == "NULL" || email == "") {
+											email = entry.object['uid'].toLowerCase() + '@' + mailDomain;
 										}
 										else
-											mail = mail.toLowerCase();
+											email = email.toLowerCase();
 
 										db.collection('user').updateOne({
-											mail: mail
+											mail: email
 										}, {
 											$set: {
 												name: entry.object[name].toUpperCase(),
 												fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1).toLowerCase(),
-												mail: mail,
+												mail: email,
 												password: hasedPassword,
 												token: generateToken(),
 												api_role: {
