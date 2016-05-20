@@ -403,8 +403,39 @@ function goToImportView(data, cb) {
         });
 
 		$(".ldap-preview").on('click', function() {
-
+            socket.emit('ldap.preview',
+                $(".ldap-name").val(),
+                $(".ldap-fname").val(),
+                $(".ldap-mail").val(),
+                10,
+                $(".ldap-filter").val(),
+                function (data) {
+                    if(typeof data != 'undefined' && data.length > 0) {
+                        var tab = $('.users-preview');
+                        tab.find("tr").not(".head").remove();
+                        data.forEach(function(u) {
+                            var line = $("<tr class='text-left'>");
+                            line.append($("<td>").html(u.name));
+                            line.append($("<td>").html(u.fname));
+                            line.append($("<td>").html(u.mail));
+                            line.append($("<td>").html(u.api_role.name));
+                            tab.append(line);
+                        });
+                        tab.parent().parent().show();
+                    }
+                }
+            );
 		});
+
+        $(".ldap-preview").on('click', function () {
+            if ($(".ldap-password1").val() != $(".ldap-password2").val()) {
+                $(".ldap-password1").parent().parent().addClass("has-error");
+                $(".ldap-password2").parent().parent().addClass("has-error");
+            }
+            else {
+
+            }
+        });
 
         $(".ldap-go").on('click', function () {
             if ($(".ldap-password1").val() != $(".ldap-password2").val()) {

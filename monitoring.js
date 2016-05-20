@@ -226,6 +226,67 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
 				});
 			});
 
+			socket.on('ldap.preview', function (name, fname, mail, max, filter, callback) {
+				var optsNoNullMail = {
+					filter: "(" + mail + "=*@*)",
+					scope: 'sub',
+					attributes: [mail],
+					sizeLimit: 1
+				};
+
+				var optsAll = {
+					filter: filter,
+					scope: 'sub',
+					attributes: ['uid', name, fname, mail],
+					sizeLimit: parseInt(max)
+				};
+
+                var mailDomain = "";
+				var tabUsers = [];
+
+				client.search(dn, optsNoNullMail, function (err, res) {
+					res.on('searchEntry', function (entry) {
+						if (typeof entry.object[mail] != 'undefined' && entry.object[mail] != "")
+							mailDomain = entry.object[mail].split('@')[1];
+					});
+
+					res.on('error', function (err) {
+                        if (err.message == "Size Limit Exceeded") {
+							client.search(dn, optsAll, function (err, res) {
+								if (err)
+									throw err;
+
+								res.on('searchEntry', function (entry) {
+									var mail = entry.object[mail];
+									if(typeof mail == 'undefined' || mail == "null" || mail == "NULL" || mail == "") {
+										mail = entry.object['uid'].toLowerCase() + '@' + mailDomain;
+									}
+									else
+										mail = mail.toLowerCase();
+
+                                    tabUsers.push({
+										name: entry.object[name].toUpperCase(),
+										fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1).toLowerCase(),
+										mail: mail,
+                                        api_role: {
+                                            name: "User"
+                                        }
+									});
+								});
+								res.on('searchReference', function (referral) {
+								});
+								res.on('error', function (err) {
+									callback(tabUsers);
+								});
+								res.on('end', function () {
+									callback(tabUsers);
+								});
+							});
+						}
+					});
+				});
+			});
+
 			socket.on('ldap.import', function (name, fname, mail, password, max, filter, callback) {
 				var optsNoNullMail = {
 					filter: "(" + mail + "=*@*)",
@@ -271,7 +332,7 @@ MongoClient.connect('mongodb://localhost:27017/linkio', function (err, db) {
 										}, {
 											$set: {
 												name: entry.object[name].toUpperCase(),
-												fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1),
+												fname: entry.object[fname][0].toUpperCase() + entry.object[fname].substr(1).toLowerCase(),
 												mail: mail,
 												password: hasedPassword,
 												token: generateToken(),
