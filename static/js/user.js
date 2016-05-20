@@ -6,6 +6,7 @@ var totalUser;
 var currentPage;
 var currentUsers;
 var currentEditUserMail = "";
+var urlMonitoring = "";
 
 var searchCritera = {
     name: "",
@@ -35,6 +36,7 @@ $(document).ready(function () {
         $(".user-apirole").attr("disabled", "disabled");
     $(".import").fadeOut(0);
     getMonitoringServerUrl(function (url) {
+        urlMonitoring = url;
         socket = io.connect(url + "?user=admin");
         socket.on('connect', function () {
             loadUsers();
@@ -251,6 +253,24 @@ $(document).ready(function () {
                     });
                 }
             });
+
+            $(".modal-password .password-url").on('click', function() {
+                $(this)[0].select();
+            });
+
+            $(".modal-password .btn-sm").on('click', function() {
+                $(".password-url")[0].select();
+
+                try {
+                    var successful = document.execCommand('copy');
+                } catch (err) {}
+
+                $(this).tooltip('show');
+
+                setTimeout(function() {
+                    $(this).tooltip('hide');
+                }, 3000);
+            });
         });
     });
 });
@@ -326,10 +346,13 @@ function loadUsersInPage() {
             line.append($("<td>").html(u.fname));
             line.append($("<td>").html(u.mail));
             line.append($("<td>").html(u.api_role.name));
-            line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>'));
-            line.append($("<td class='action'>").html('<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>'));
+            line.append($("<td class='action'>").html('<button class="btn btn-primary btn-sm password-btn" type="button"><span class="glyphicon glyphicon-lock" aria-hidden="true"></span></button><button class="btn btn-primary btn-sm edit-btn"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></button><button class="btn btn-primary btn-sm rm-btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>'));
 
-            line.find(".glyphicon-pencil").click(function () {
+            line.find(".password-btn").click(function () {
+                $(".modal-password").modal('show').find(".form-control").val(urlMonitoring + "/password.html?token=" + u.token);
+            });
+
+            line.find(".edit-btn").click(function () {
                 currentEditUserMail = u.mail;
                 $(".modal-add-user .ok").html("Edit");
                 $('table.apps tr').not('.head').remove();
@@ -353,7 +376,7 @@ function loadUsersInPage() {
                 $(".modal-add-user").modal('show');
             });
 
-            line.find(".glyphicon-remove").click(function () {
+            line.find(".rm-btn").click(function () {
                 $(".modal-delete-name").html(u.mail);
                 $(".modal-delete-user").modal('show');
 

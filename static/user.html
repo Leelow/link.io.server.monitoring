@@ -32,7 +32,8 @@
 
             <ul class="nav navbar-nav navbar-right">
                 <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="name"></span> <span class="caret"></span></a>
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
+                       aria-expanded="false"><span class="name"></span> <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li class="disconnect"><a href="#">Disconnect</a></li>
                     </ul>
@@ -89,8 +90,7 @@
                     <th>First name</th>
                     <th>Email</th>
                     <th>API role</th>
-                    <th class="text-center">Edit</th>
-                    <th class="text-center">Delete</th>
+                    <th class="text-center">Actions</th>
                 </tr>
             </table>
             <div class="text-right">
@@ -304,6 +304,28 @@
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary ok">Next</button>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade modal-password" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Link to change password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" class="form-control input-sm text-center password-url" readonly>
+                    <span class="input-group-btn">
+                        <button class="btn btn-success btn-sm btn-copy" type="button" data-toggle="tooltip" data-placement="top" title="Copied!">Copy</button>
+                    </span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

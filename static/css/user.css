@@ -1,9 +1,30 @@
+#app .table tr td {
+    line-height: 35px;
+}
+
 .table .glyphicon {
     cursor: pointer;
 }
 
+.table .rm-btn {
+    margin-left: 2px;
+}
+
+.table .edit-btn {
+    margin-left: 2px;
+}
+
 .table td.action {
     text-align: center;
+}
+
+.table td.action .input-group {
+    width: 13em;
+    margin: auto;
+}
+
+.table .action input {
+    width: 10em;
 }
 
 .alert-wrapper {
