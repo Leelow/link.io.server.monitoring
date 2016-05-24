@@ -16,10 +16,18 @@ IF EXIST "link.io" GOTO STEP1
     echo Link.IO server:
     echo|set /p=    1) Cloning server from GitHub...
     git clone -q "https://github.com/Chaniro/link.io.server.git"
+    if %ERRORLEVEL% == 0 goto :NEXT1
+    echo Please install Git and add it to the PATH variable
+    goto :END
+:NEXT1
     echo ok
     echo|set /p=    2) Installing dependencies...
     cd "link.io.server"
     call npm --loglevel=silent install > NUL 2>&1
+    if %ERRORLEVEL% == 0 goto :NEXT2
+    echo Please install NPM and add it to the PATH variable
+    goto :END
+:NEXT2
     echo ok
     echo.
     cd ".."
@@ -56,14 +64,19 @@ IF EXIST "link.io" GOTO STEP1
     SET modified=!step4:localhost=%SERVERIP%!
 
     echo !modified! >> %OUTTEXTFILE%
-    )
+
     del %INTEXTFILE%
     rename %OUTTEXTFILE% %INTEXTFILE%
+
+    xcopy "%CD%\scripts\start\link.io.bat" "%CD%\.."
 
     echo.
     echo Configuration done.
     echo If you want to change these configurations later, please edit:
     echo     -^>   link.io/link.io.server.monitoring/settings.json
+    echo You can start the server with link.io/start.bat
 
 cd %CURRENT%
 call npm set progress=true
+
+:END
