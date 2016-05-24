@@ -55,20 +55,21 @@ IF EXIST "link.io" GOTO STEP1
     set /p ADMMAIL=Mail:
     set /p ADMPASS=Password:
 
-    for /f "tokens=1,* delims=¶" %%A in ( '"type %INTEXTFILE%"') do (
-    SET string=%%A
-    SET step1=!string:8081=%MONITORINGPORT%!
-    SET step2=!step1:8080=%SERVERPORT%!
-    SET step3=!step2:admin@link.io=%ADMMAIL%!
-    SET step4=!step3:admin=%ADMPASS%!
-    SET modified=!step4:localhost=%SERVERIP%!
+    xcopy "%CD%\scripts\start\link.io.bat" "%CD%\.." > NUL 2>&1
 
-    echo !modified! >> %OUTTEXTFILE%
+    for /f "tokens=1,* delims=¶" %%A in ( '"type %INTEXTFILE%"') do (
+        SET string=%%A
+        SET step1=!string:8081=%MONITORINGPORT%!
+        SET step2=!step1:8080=%SERVERPORT%!
+        SET step3=!step2:admin@link.io=%ADMMAIL%!
+        SET step4=!step3:admin=%ADMPASS%!
+        SET modified=!step4:localhost=%SERVERIP%!
+
+        echo !modified! >> %OUTTEXTFILE%
+    )
 
     del %INTEXTFILE%
     rename %OUTTEXTFILE% %INTEXTFILE%
-
-    xcopy "%CD%\scripts\start\link.io.bat" "%CD%\.."
 
     echo.
     echo Configuration done.
